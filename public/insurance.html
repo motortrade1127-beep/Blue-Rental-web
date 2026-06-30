@@ -13,83 +13,87 @@
         <img src="./assets/logo/blue-rental-logo-transparent-cropped.png" alt="Blue Rental">
       </a>
       <nav aria-label="Primary">
-        <a href="./index.html#about">About</a>
-        <a href="./index.html#reviews">Reviews</a>
-        <a href="./index.html#fleet">Vehicles</a>
-        <a href="./index.html#locations">Locations</a>
-        <a href="./insurance.html" aria-current="page">Insurance</a>
-        <a href="./index.html#rental-info">Rental Info</a>
-        <a href="./index.html#support">Support</a>
+        <a href="./index.html#about" data-i18n="nav.about">About</a>
+        <a href="./index.html#reviews" data-i18n="nav.reviews">Reviews</a>
+        <a href="./index.html#fleet" data-i18n="nav.vehicles">Vehicles</a>
+        <a href="./index.html#locations" data-i18n="nav.locations">Locations</a>
+        <a href="./insurance.html" aria-current="page" data-i18n="nav.insurance">Insurance</a>
+        <a href="./index.html#rental-info" data-i18n="nav.rentalInfo">Rental Info</a>
+        <a href="./index.html#support" data-i18n="nav.support">Support</a>
       </nav>
-      <a class="header-action" href="./index.html#booking">Book Now</a>
+      <div class="language-switch" aria-label="Language switch">
+        <button type="button" data-lang-toggle="en" class="active">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <a class="header-action" href="./index.html#booking" data-i18n="bookNow">Book Now</a>
     </header>
 
     <main>
       <section class="insurance-hero">
-        <p class="eyebrow">Insurance & Liability Reduction</p>
-        <h1>Choose the cover level that fits your trip</h1>
-        <p>Blue Rental offers simple liability reduction options so customers can compare daily cost, excess, bond and included cover before pick-up.</p>
+        <p class="eyebrow" data-i18n="hero.eyebrow">Insurance & Liability Reduction</p>
+        <h1 data-i18n="hero.title">Choose the cover level that fits your trip</h1>
+        <p data-i18n="hero.copy">Blue Rental offers simple liability reduction options so customers can compare daily cost, excess, bond and included cover before pick-up.</p>
       </section>
 
       <section class="section insurance-section">
         <div class="section-heading">
-          <p class="eyebrow">Liability Reduction Options</p>
-          <h2>Coverage comparison</h2>
-          <p>Prices and conditions can vary by vehicle, driver profile and rental agreement. Final cover eligibility is confirmed by Blue Rental at booking or pick-up.</p>
+          <p class="eyebrow" data-i18n="table.eyebrow">Liability Reduction Options</p>
+          <h2 data-i18n="table.title">Coverage comparison</h2>
+          <p data-i18n="table.copy">Prices and conditions can vary by vehicle, driver profile and rental agreement. Final cover eligibility is confirmed by Blue Rental at booking or pick-up.</p>
         </div>
 
         <div class="insurance-table-wrap">
           <table class="insurance-table">
             <thead>
               <tr>
-                <th>Coverage Level</th>
-                <th>Standard Cover</th>
-                <th>Smart Cover</th>
-                <th>Elite Cover</th>
+                <th data-i18n="table.headers.level">Coverage Level</th>
+                <th data-i18n="table.headers.standard">Standard Cover</th>
+                <th data-i18n="table.headers.smart">Smart Cover</th>
+                <th data-i18n="table.headers.elite">Elite Cover</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <th>Cost</th>
+                <th data-i18n="table.rows.cost">Cost</th>
                 <td>NZ$0 / day</td>
                 <td>NZ$20 / day</td>
                 <td>NZ$40 / day</td>
               </tr>
               <tr>
-                <th>Collision Damage Excess Fee</th>
+                <th data-i18n="table.rows.collision">Collision Damage Excess Fee</th>
                 <td>NZ$4,000</td>
                 <td>NZ$2,000</td>
                 <td>NZ$500</td>
               </tr>
               <tr>
-                <th>Bond On Hold</th>
+                <th data-i18n="table.rows.bond">Bond On Hold</th>
                 <td>NZ$2,000</td>
                 <td>NZ$1,000</td>
                 <td>NZ$500</td>
               </tr>
               <tr>
-                <th>Roadside Assistance Cover</th>
-                <td><span class="cross" aria-label="Not included">x</span></td>
-                <td><span class="check" aria-label="Included">✓</span></td>
-                <td><span class="check" aria-label="Included">✓</span></td>
+                <th data-i18n="table.rows.roadside">Roadside Assistance Cover</th>
+                <td><span class="cross" aria-label="Not included">&times;</span></td>
+                <td><span class="check" aria-label="Included">&#10003;</span></td>
+                <td><span class="check" aria-label="Included">&#10003;</span></td>
               </tr>
               <tr>
-                <th>Windshield Chip Cover</th>
-                <td><span class="cross" aria-label="Not included">x</span></td>
-                <td><span class="check" aria-label="Included">✓</span></td>
-                <td><span class="check" aria-label="Included">✓</span></td>
+                <th data-i18n="table.rows.windshield">Windshield Chip Cover</th>
+                <td><span class="cross" aria-label="Not included">&times;</span></td>
+                <td><span class="check" aria-label="Included">&#10003;</span></td>
+                <td><span class="check" aria-label="Included">&#10003;</span></td>
               </tr>
               <tr>
-                <th>Tyre Cover</th>
-                <td><span class="cross" aria-label="Not included">x</span></td>
-                <td><span class="cross" aria-label="Not included">x</span></td>
-                <td><span class="check" aria-label="Included">✓</span></td>
+                <th data-i18n="table.rows.tyre">Tyre Cover</th>
+                <td><span class="cross" aria-label="Not included">&times;</span></td>
+                <td><span class="cross" aria-label="Not included">&times;</span></td>
+                <td><span class="check" aria-label="Included">&#10003;</span></td>
               </tr>
               <tr>
-                <th>Third-Party Liability Excess</th>
+                <th data-i18n="table.rows.thirdParty">Third-Party Liability Excess</th>
                 <td>NZ$4,000</td>
                 <td>NZ$4,000</td>
-                <td><span class="check" aria-label="Included">✓</span></td>
+                <td><span class="check" aria-label="Included">&#10003;</span></td>
               </tr>
             </tbody>
           </table>
@@ -98,29 +102,181 @@
 
       <section class="section insurance-notes">
         <div>
-          <p class="eyebrow">Key Information</p>
-          <h2>Important conditions</h2>
+          <p class="eyebrow" data-i18n="notes.eyebrow">Key Information</p>
+          <h2 data-i18n="notes.title">Important conditions</h2>
         </div>
         <ul>
-          <li><strong>International drivers:</strong> Elite Cover may cost 1.5 times the standard rate due to higher risk.</li>
-          <li><strong>Exclusions:</strong> Damage caused by negligence, intentional actions or breach of the rental agreement is not covered.</li>
-          <li><strong>Compliance:</strong> The vehicle must be driven in accordance with all New Zealand road laws.</li>
-          <li><strong>Elite Cover limitations:</strong> Terms may vary depending on vehicle type, rental dates and the signed rental agreement.</li>
-          <li><strong>Final decision:</strong> Blue Rental reserves the right to determine coverage applicability.</li>
+          <li data-i18n-html="notes.items.0"><strong>International drivers:</strong> Elite Cover may cost 1.5 times the standard rate due to higher risk.</li>
+          <li data-i18n-html="notes.items.1"><strong>Exclusions:</strong> Damage caused by negligence, intentional actions or breach of the rental agreement is not covered.</li>
+          <li data-i18n-html="notes.items.2"><strong>Compliance:</strong> The vehicle must be driven in accordance with all New Zealand road laws.</li>
+          <li data-i18n-html="notes.items.3"><strong>Elite Cover limitations:</strong> Terms may vary depending on vehicle type, rental dates and the signed rental agreement.</li>
+          <li data-i18n-html="notes.items.4"><strong>Final decision:</strong> Blue Rental reserves the right to determine coverage applicability.</li>
         </ul>
       </section>
 
       <section class="support-band">
         <div>
-          <p class="eyebrow">Agent Bookings</p>
-          <h2>Already purchased insurance elsewhere?</h2>
+          <p class="eyebrow" data-i18n="agent.eyebrow">Agent Bookings</p>
+          <h2 data-i18n="agent.title">Already purchased insurance elsewhere?</h2>
         </div>
         <ul>
-          <li>Standard Blue Rental insurance requirements still apply.</li>
-          <li>Third-party insurance claims may need to be submitted after damage charges have been settled with Blue Rental.</li>
-          <li>Bring your policy details and booking confirmation when collecting the vehicle.</li>
+          <li data-i18n="agent.items.0">Standard Blue Rental insurance requirements still apply.</li>
+          <li data-i18n="agent.items.1">Third-party insurance claims may need to be submitted after damage charges have been settled with Blue Rental.</li>
+          <li data-i18n="agent.items.2">Bring your policy details and booking confirmation when collecting the vehicle.</li>
         </ul>
       </section>
     </main>
+
+    <script>
+      const dictionary = {
+        en: {
+          title: 'Insurance Options | Blue Rental',
+          nav: {
+            about: 'About',
+            reviews: 'Reviews',
+            vehicles: 'Vehicles',
+            locations: 'Locations',
+            insurance: 'Insurance',
+            rentalInfo: 'Rental Info',
+            support: 'Support'
+          },
+          bookNow: 'Book Now',
+          hero: {
+            eyebrow: 'Insurance & Liability Reduction',
+            title: 'Choose the cover level that fits your trip',
+            copy: 'Blue Rental offers simple liability reduction options so customers can compare daily cost, excess, bond and included cover before pick-up.'
+          },
+          table: {
+            eyebrow: 'Liability Reduction Options',
+            title: 'Coverage comparison',
+            copy: 'Prices and conditions can vary by vehicle, driver profile and rental agreement. Final cover eligibility is confirmed by Blue Rental at booking or pick-up.',
+            headers: {
+              level: 'Coverage Level',
+              standard: 'Standard Cover',
+              smart: 'Smart Cover',
+              elite: 'Elite Cover'
+            },
+            rows: {
+              cost: 'Cost',
+              collision: 'Collision Damage Excess Fee',
+              bond: 'Bond On Hold',
+              roadside: 'Roadside Assistance Cover',
+              windshield: 'Windshield Chip Cover',
+              tyre: 'Tyre Cover',
+              thirdParty: 'Third-Party Liability Excess'
+            }
+          },
+          notes: {
+            eyebrow: 'Key Information',
+            title: 'Important conditions',
+            items: [
+              '<strong>International drivers:</strong> Elite Cover may cost 1.5 times the standard rate due to higher risk.',
+              '<strong>Exclusions:</strong> Damage caused by negligence, intentional actions or breach of the rental agreement is not covered.',
+              '<strong>Compliance:</strong> The vehicle must be driven in accordance with all New Zealand road laws.',
+              '<strong>Elite Cover limitations:</strong> Terms may vary depending on vehicle type, rental dates and the signed rental agreement.',
+              '<strong>Final decision:</strong> Blue Rental reserves the right to determine coverage applicability.'
+            ]
+          },
+          agent: {
+            eyebrow: 'Agent Bookings',
+            title: 'Already purchased insurance elsewhere?',
+            items: [
+              'Standard Blue Rental insurance requirements still apply.',
+              'Third-party insurance claims may need to be submitted after damage charges have been settled with Blue Rental.',
+              'Bring your policy details and booking confirmation when collecting the vehicle.'
+            ]
+          }
+        },
+        zh: {
+          title: '保险选项 | Blue Rental',
+          nav: {
+            about: '关于我们',
+            reviews: '客户评价',
+            vehicles: '车辆',
+            locations: '取还车地点',
+            insurance: '保险',
+            rentalInfo: '租车信息',
+            support: '客服支持'
+          },
+          bookNow: '立即预订',
+          hero: {
+            eyebrow: '保险与责任降低选项',
+            title: '根据行程选择适合您的保险方案',
+            copy: 'Blue Rental 提供清晰的责任降低选项，方便客户在取车前比较每日费用、事故垫底费、预授权押金和包含保障。'
+          },
+          table: {
+            eyebrow: '责任降低选项',
+            title: '保险方案对比',
+            copy: '价格和条款可能会根据车型、驾驶人资料和租车协议有所不同。最终保险适用情况由 Blue Rental 在预订或取车时确认。',
+            headers: {
+              level: '保障级别',
+              standard: 'Standard Cover 标准保险',
+              smart: 'Smart Cover 智能保险',
+              elite: 'Elite Cover 精英保险'
+            },
+            rows: {
+              cost: '费用',
+              collision: '碰撞损坏垫底费',
+              bond: '预授权押金',
+              roadside: '道路救援保障',
+              windshield: '挡风玻璃小石子损伤保障',
+              tyre: '轮胎保障',
+              thirdParty: '第三方责任垫底费'
+            }
+          },
+          notes: {
+            eyebrow: '重要信息',
+            title: '关键条款说明',
+            items: [
+              '<strong>国际驾照客户：</strong>Elite Cover 可能按标准价格的 1.5 倍收取，具体取决于风险评估。',
+              '<strong>不包含情况：</strong>因疏忽、故意行为或违反租车协议造成的损坏不在保障范围内。',
+              '<strong>遵守法规：</strong>车辆必须按照新西兰道路交通法规驾驶。',
+              '<strong>Elite Cover 限制：</strong>具体条款可能因车型、租期和已签署的租车协议而有所不同。',
+              '<strong>最终决定：</strong>Blue Rental 保留判断保险适用情况的权利。'
+            ]
+          },
+          agent: {
+            eyebrow: '平台代理订单',
+            title: '已经通过第三方购买保险？',
+            items: [
+              'Blue Rental 的标准保险要求仍然适用。',
+              '如涉及第三方保险索赔，客户可能需要先与 Blue Rental 结清损坏费用后，再向保险方提交理赔。',
+              '取车时请携带保险单信息和预订确认资料。'
+            ]
+          }
+        }
+      };
+
+      function getNestedValue(source, path) {
+        return path.split('.').reduce((value, key) => value?.[key], source);
+      }
+
+      function applyInsuranceLanguage(lang) {
+        const current = dictionary[lang] || dictionary.en;
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en-NZ';
+        document.title = current.title;
+        localStorage.setItem('blueRentalLang', lang);
+
+        document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
+          button.classList.toggle('active', button.dataset.langToggle === lang);
+        });
+
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const value = getNestedValue(current, node.dataset.i18n);
+          if (value) node.textContent = value;
+        });
+
+        document.querySelectorAll('[data-i18n-html]').forEach((node) => {
+          const value = getNestedValue(current, node.dataset.i18nHtml);
+          if (value) node.innerHTML = value;
+        });
+      }
+
+      document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
+        button.addEventListener('click', () => applyInsuranceLanguage(button.dataset.langToggle));
+      });
+
+      applyInsuranceLanguage(localStorage.getItem('blueRentalLang') || 'en');
+    </script>
   </body>
 </html>
