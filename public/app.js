@@ -618,7 +618,7 @@ function applyLanguage() {
     article.querySelector('p').textContent = t.process.cards[index][2];
   });
 
-  setText('#rental-info .eyebrow', t.rentalInfo.eyebrow);
+  setText('[data-admin-payments-link]', t.rentalInfo.eyebrow);
   setText('#rental-info h2', t.rentalInfo.title);
   document.querySelectorAll('#rental-info article').forEach((article, index) => {
     article.querySelector('h3').textContent = t.rentalInfo.cards[index][0];
