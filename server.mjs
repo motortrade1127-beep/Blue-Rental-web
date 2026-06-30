@@ -1,14 +1,16 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
 import express from 'express';
-import Stripe from 'stripe';
 
 const app = express();
 const port = Number(process.env.PORT || 4317);
 const siteUrl = process.env.SITE_URL || `http://localhost:${port}`;
 const useDemoData = String(process.env.RCM_USE_DEMO_DATA ?? 'true') === 'true';
-const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
-const stripe = stripeSecret && !stripeSecret.includes('replace_me') ? new Stripe(stripeSecret) : null;
+const paymentProvider = (process.env.PAYMENT_PROVIDER || '').toLowerCase();
+const pxpayUserId = process.env.PXPAY_USER_ID || '';
+const pxpayKey = process.env.PXPAY_KEY || '';
+const pxpayEndpoint = process.env.PXPAY_ENDPOINT || 'https://sec.windcave.com/pxaccess/pxpay.aspx';
+const pxpayEnabled = Boolean(pxpayUserId && pxpayKey && !pxpayKey.includes('replace_me'));
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -194,10 +196,100 @@ function quoteVehicle(vehicle, search) {
   const subtotal = vehicle.dailyRate * days;
   const fees = Math.round(subtotal * 0.08);
   const total = subtotal + fees;
-  const depositPercent = Number(process.env.STRIPE_DEPOSIT_PERCENT || 10);
+  const depositPercent = Number(process.env.DEPOSIT_PERCENT || 10);
   const deposit = Math.round(total * depositPercent / 100);
 
   return { ...vehicle, days, subtotal, fees, total, deposit };
+}
+
+function xmlEscape(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function xmlDecode(value = '') {
+  return String(value)
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function xmlTag(xml, tag) {
+  const match = String(xml).match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+  return match ? xmlDecode(match[1].trim()) : '';
+}
+
+function xmlIsValid(xml) {
+  return /valid=["']1["']/i.test(String(xml));
+}
+
+async function postPxpayXml(xml) {
+  const response = await fetch(pxpayEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: xml
+  });
+
+  const text = await response.text();
+  if (!response.ok) throw new Error(`PxPay returned ${response.status}: ${text}`);
+  return text;
+}
+
+async function createPxpayPayment({ bookingId, vehicleName, deposit, total, customerEmail }) {
+  const amount = Number(deposit).toFixed(2);
+  const currency = (process.env.PAYMENT_CURRENCY || 'NZD').toUpperCase();
+  const txnId = `${bookingId}-${Date.now()}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 64);
+  const balance = Math.max(0, Number(total) - Number(deposit)).toFixed(2);
+  const returnUrl = `${siteUrl}/payment/pxpay-result?booking=${encodeURIComponent(bookingId)}`;
+
+  const requestXml = `<?xml version="1.0" encoding="utf-8"?>
+<GenerateRequest>
+  <PxPayUserId>${xmlEscape(pxpayUserId)}</PxPayUserId>
+  <PxPayKey>${xmlEscape(pxpayKey)}</PxPayKey>
+  <TxnType>Purchase</TxnType>
+  <AmountInput>${xmlEscape(amount)}</AmountInput>
+  <CurrencyInput>${xmlEscape(currency)}</CurrencyInput>
+  <MerchantReference>${xmlEscape(bookingId)}</MerchantReference>
+  <TxnId>${xmlEscape(txnId)}</TxnId>
+  <EmailAddress>${xmlEscape(customerEmail || '')}</EmailAddress>
+  <TxnData1>${xmlEscape(vehicleName || 'Blue Rental vehicle')}</TxnData1>
+  <TxnData2>${xmlEscape(`Balance due on pickup: ${currency} ${balance}`)}</TxnData2>
+  <UrlSuccess>${xmlEscape(returnUrl)}</UrlSuccess>
+  <UrlFail>${xmlEscape(returnUrl)}</UrlFail>
+</GenerateRequest>`;
+
+  const resultXml = await postPxpayXml(requestXml);
+  const uri = xmlTag(resultXml, 'URI');
+  if (!xmlIsValid(resultXml) || !uri) {
+    throw new Error(xmlTag(resultXml, 'ResponseText') || 'PxPay did not return a payment URL.');
+  }
+
+  return uri;
+}
+
+async function processPxpayResult(resultToken) {
+  const requestXml = `<?xml version="1.0" encoding="utf-8"?>
+<ProcessResponse>
+  <PxPayUserId>${xmlEscape(pxpayUserId)}</PxPayUserId>
+  <PxPayKey>${xmlEscape(pxpayKey)}</PxPayKey>
+  <Response>${xmlEscape(resultToken)}</Response>
+</ProcessResponse>`;
+
+  const resultXml = await postPxpayXml(requestXml);
+  return {
+    valid: xmlIsValid(resultXml),
+    success: xmlTag(resultXml, 'Success') === '1',
+    merchantReference: xmlTag(resultXml, 'MerchantReference'),
+    txnId: xmlTag(resultXml, 'TxnId'),
+    dpsTxnRef: xmlTag(resultXml, 'DpsTxnRef'),
+    responseText: xmlTag(resultXml, 'ResponseText') || xmlTag(resultXml, 'HelpText')
+  };
 }
 
 app.post('/api/availability', async (req, res) => {
@@ -237,8 +329,9 @@ app.post('/api/bookings', async (req, res) => {
 
 app.post('/api/pay-deposit', async (req, res) => {
   const { bookingId, vehicleName, deposit, total, customerEmail } = req.body;
+  const provider = paymentProvider || (pxpayEnabled ? 'pxpay' : 'demo');
 
-  if (!stripe) {
+  if (provider === 'demo') {
     res.json({
       mode: 'demo',
       checkoutUrl: `${siteUrl}/success.html?booking=${encodeURIComponent(bookingId)}&demo=true`
@@ -246,36 +339,45 @@ app.post('/api/pay-deposit', async (req, res) => {
     return;
   }
 
-  try {
-    const currency = (process.env.STRIPE_CURRENCY || 'nzd').toLowerCase();
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      customer_email: customerEmail || undefined,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency,
-            unit_amount: Math.round(Number(deposit) * 100),
-            product_data: {
-              name: `Deposit for ${vehicleName}`,
-              description: `Booking ${bookingId}. Balance due on pickup: ${currency.toUpperCase()} ${Math.max(0, Number(total) - Number(deposit)).toFixed(2)}`
-            }
-          }
-        }
-      ],
-      metadata: {
-        bookingId,
-        total: String(total),
-        deposit: String(deposit)
-      },
-      success_url: `${siteUrl}/success.html?booking=${encodeURIComponent(bookingId)}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/?payment=cancelled&booking=${encodeURIComponent(bookingId)}`
-    });
+  if (provider !== 'pxpay') {
+    res.status(400).json({ error: 'Unsupported payment provider. Use pxpay or demo.' });
+    return;
+  }
 
-    res.json({ mode: 'stripe', checkoutUrl: session.url });
+  if (!pxpayEnabled) {
+    res.status(500).json({ error: 'PxPay is selected but PXPAY_USER_ID or PXPAY_KEY is missing.' });
+    return;
+  }
+
+  try {
+    const checkoutUrl = await createPxpayPayment({ bookingId, vehicleName, deposit, total, customerEmail });
+    res.json({ mode: 'pxpay', checkoutUrl });
   } catch (error) {
     res.status(502).json({ error: error.message });
+  }
+});
+
+app.get('/payment/pxpay-result', async (req, res) => {
+  const bookingId = req.query.booking || 'Pending';
+  const resultToken = req.query.result;
+
+  if (!resultToken || !pxpayEnabled) {
+    res.redirect(`/payment-failed.html?booking=${encodeURIComponent(bookingId)}&reason=${encodeURIComponent('Missing PxPay response')}`);
+    return;
+  }
+
+  try {
+    const result = await processPxpayResult(resultToken);
+    const reference = result.merchantReference || bookingId;
+
+    if (result.valid && result.success) {
+      res.redirect(`/success.html?booking=${encodeURIComponent(reference)}&provider=pxpay&txn=${encodeURIComponent(result.dpsTxnRef || result.txnId || '')}`);
+      return;
+    }
+
+    res.redirect(`/payment-failed.html?booking=${encodeURIComponent(reference)}&reason=${encodeURIComponent(result.responseText || 'Payment was not approved')}`);
+  } catch (error) {
+    res.redirect(`/payment-failed.html?booking=${encodeURIComponent(bookingId)}&reason=${encodeURIComponent(error.message)}`);
   }
 });
 

@@ -77,7 +77,7 @@ const i18n = {
       cards: [
         ['01', 'Search availability', 'The website sends location and date details to the backend, which can query RCM for live fleet availability.'],
         ['02', 'Confirm customer details', 'The customer chooses a vehicle, enters their name, email and phone, then a pending booking is created.'],
-        ['03', 'Pay a 10% deposit online', 'Stripe Checkout collects a 10% deposit securely, then the paid status can be written back to RCM.']
+        ['03', 'Pay a 10% deposit online', 'Windcave PxPay collects a 10% deposit securely, then the paid status can be written back to RCM.']
       ]
     },
     rentalInfo: {
@@ -88,7 +88,7 @@ const i18n = {
         ['Terms & Conditions', 'Add your licence, age, bond, fuel, cancellation and late return rules here so customers can review them before checkout.'],
         ['Insurance Option', 'Show standard cover, excess reduction options and any daily insurance pricing returned by Rental Car Manager.'],
         ['Pick-up and Drop-off', 'Explain Hornby office collection, airport shuttle steps, after-hours instructions and what customers need to bring.'],
-        ['Online Deposit', 'Customers can pay 10% of the order amount online through Stripe Checkout, while the remaining balance can be due on pick-up.']
+        ['Online Deposit', 'Customers can pay 10% of the order amount online through Windcave PxPay, while the remaining balance can be due on pick-up.']
       ]
     },
     support: {
@@ -110,7 +110,7 @@ const i18n = {
       title: 'Confirm booking and pay 10% deposit',
       labels: ['Name', 'Email', 'Phone'],
       placeholders: ['Full name', 'name@example.com', '+64'],
-      finePrint: 'Payments are handled by Stripe Checkout. Without a Stripe key, this demo redirects to a simulated success page.'
+      finePrint: 'Payments are handled by Windcave PxPay. In demo mode, this redirects to a simulated success page.'
     },
     buttons: {
       bookDeposit: 'Book and Pay 10% Deposit',
@@ -207,7 +207,7 @@ const i18n = {
         ['租车条款', '可在这里补充驾照、年龄、押金、油量、取消政策和逾期还车规则。'],
         ['保险选项', '展示基础保险、降低垫底费选项，以及 RCM 返回的每日保险价格。'],
         ['取车与还车', '说明 Hornby 门店取车、机场 shuttle 步骤、非营业时间说明和客户需携带的资料。'],
-        ['线上定金', '客户可通过 Stripe Checkout 线上支付订单金额 10% 定金，余款可在取车时支付。']
+        ['线上定金', '客户可通过 Windcave PxPay 线上支付订单金额 10% 定金，余款可在取车时支付。']
       ]
     },
     support: {
@@ -229,7 +229,7 @@ const i18n = {
       title: '确认预订并支付 10% 定金',
       labels: ['姓名', '邮箱', '电话'],
       placeholders: ['姓名', 'name@example.com', '+64'],
-      finePrint: '付款由 Stripe Checkout 处理。未配置 Stripe 密钥时，本演示会跳转到模拟成功页面。'
+      finePrint: '付款由 Windcave PxPay 处理。演示模式下会跳转到模拟成功页面。'
     },
     buttons: {
       bookDeposit: '预订并支付 10% 定金',
