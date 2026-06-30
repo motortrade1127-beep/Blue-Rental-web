@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blue Rental | Affordable Car Rentals in New Zealand</title>
+    <meta name="description" content="Blue Rental booking website ready for Rental Car Manager API and Stripe deposit payments.">
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand logo-mark" href="./index.html" aria-label="Blue Rental home">
+        <img src="./assets/logo/blue-rental-logo-transparent-cropped.png" alt="Blue Rental">
+      </a>
+      <nav aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#fleet">Vehicles</a>
+        <a href="#locations">Locations</a>
+        <a href="#rental-info">Rental Info</a>
+        <a href="#support">Support</a>
+      </nav>
+      <div class="language-switch" aria-label="Language switch">
+        <button type="button" data-lang-toggle="en" class="active">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <a class="header-action" href="#booking">Book Now</a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-overlay">
+          <p class="eyebrow">Christchurch & South Island Car Hire</p>
+          <h1>Explore New Zealand with Blue Rental</h1>
+          <p class="hero-copy">Find the best car for your journey. Affordable, well-maintained vehicles for city errands, South Island road trips and business travel.</p>
+        </div>
+        <form id="booking" class="booking-panel" autocomplete="on">
+          <label>
+            Pick-up location
+            <select name="pickupLocation">
+              <option>Christchurch</option>
+              <option>Queenstown</option>
+            </select>
+          </label>
+          <label>
+            Drop-off location
+            <select name="returnLocation">
+              <option>Christchurch</option>
+              <option>Queenstown</option>
+            </select>
+          </label>
+          <label>
+            Pick-up date
+            <input name="pickupDate" type="date" required>
+          </label>
+          <label>
+            Drop-off date
+            <input name="returnDate" type="date" required>
+          </label>
+          <button class="button primary" type="submit">Search Vehicles</button>
+        </form>
+      </section>
+
+      <section class="trust-strip" aria-label="Benefits">
+        <div><strong>3000+</strong><span>Positive reviews across the web and still growing</span></div>
+        <div><strong>$35</strong><span>NZD/day starting price</span></div>
+        <div><strong>9.30am-5pm</strong><span>Public holiday surcharge may apply</span></div>
+        <div><strong>Free shuttle</strong><span>Between the airport and our branch</span></div>
+      </section>
+
+      <section id="about" class="section about-section">
+        <div class="section-heading">
+          <p class="eyebrow">About Us - Blue Rental</p>
+          <h2>Your trusted partner for high-quality car rentals</h2>
+          <p>Blue Rental is based in Christchurch, New Zealand and focuses on value, reliability and a stress-free rental experience for travellers exploring the South Island or customers needing a vehicle for business.</p>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <h3>Well-maintained vehicles</h3>
+            <p>A practical fleet for compact city driving, hybrid economy, family travel, business use and premium SUV bookings.</p>
+          </article>
+          <article>
+            <h3>Friendly service team</h3>
+            <p>Helpful local support from booking to pick-up, with clear communication and practical travel advice.</p>
+          </article>
+          <article>
+            <h3>Online booking discount</h3>
+            <p>Book online and enjoy up to 25% off. T&C apply.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="reviews" class="reviews-section" aria-label="Customer reviews">
+        <div class="review-intro">
+          <p class="eyebrow">Customer Reviews</p>
+          <h2>3000+ positive reviews across online platforms</h2>
+          <p>Travellers consistently highlight helpful service, clean vehicles, easy pick-up and good value for South Island trips.</p>
+        </div>
+        <div class="review-marquee" aria-label="Scrolling customer review highlights">
+          <div class="review-track">
+            <article><strong>Wonderful staff</strong><span>Helpful service from booking through pick-up.</span></article>
+            <article><strong>Clean, reliable cars</strong><span>Well-presented vehicles for city and road-trip travel.</span></article>
+            <article><strong>Easy airport shuttle</strong><span>Convenient Christchurch Airport pick-up and drop-off.</span></article>
+            <article><strong>Great value</strong><span>Affordable daily rates with practical vehicle options.</span></article>
+            <article><strong>Friendly support</strong><span>Clear communication and helpful local advice.</span></article>
+            <article><strong>Smooth booking</strong><span>Simple process, transparent pricing and quick confirmation.</span></article>
+            <article><strong>Wonderful staff</strong><span>Helpful service from booking through pick-up.</span></article>
+            <article><strong>Clean, reliable cars</strong><span>Well-presented vehicles for city and road-trip travel.</span></article>
+            <article><strong>Easy airport shuttle</strong><span>Convenient Christchurch Airport pick-up and drop-off.</span></article>
+            <article><strong>Great value</strong><span>Affordable daily rates with practical vehicle options.</span></article>
+            <article><strong>Friendly support</strong><span>Clear communication and helpful local advice.</span></article>
+            <article><strong>Smooth booking</strong><span>Simple process, transparent pricing and quick confirmation.</span></article>
+          </div>
+        </div>
+      </section>
+
+      <section id="fleet" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Our Vehicles</p>
+          <h2>Super eco, compact, sedans, wagons, SUVs and luxury SUVs</h2>
+          <p>We offer super eco, compact, middle size sedan, wagon, SUVs, 4x4 and luxury SUVs for different travel needs.</p>
+        </div>
+        <div id="status" class="status">Select your dates to search available vehicles.</div>
+        <div id="fleetGrid" class="fleet-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="locations" class="section locations-section">
+        <div class="section-heading">
+          <p class="eyebrow">Pick-up and Drop-off Locations</p>
+          <h2>Branch and airport support</h2>
+        </div>
+        <div class="location-grid">
+          <article>
+            <span class="location-code">CHC APT</span>
+            <h3>Christchurch Airport</h3>
+            <p>Christchurch Airport bookings include a free shuttle transfer to our branch.</p>
+          </article>
+          <article>
+            <span class="location-code">Hornby</span>
+            <h3>249 Main South Rd</h3>
+            <p>Blue Rental is based at 249 Main South Rd, Hornby, Christchurch 8042, New Zealand.</p>
+          </article>
+          <article>
+            <span class="location-code">ZQN APT</span>
+            <h3>Queenstown Airport</h3>
+            <p>Queenstown Airport service is in preparation, coming soon.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="process" class="process section">
+        <div class="section-heading">
+          <p class="eyebrow">Online Booking</p>
+          <h2>A clearer booking flow for Blue Rental</h2>
+        </div>
+        <div class="steps">
+          <article>
+            <span>01</span>
+            <h3>Search availability</h3>
+            <p>The website sends location and date details to the backend, which can query RCM for live fleet availability.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Confirm customer details</h3>
+            <p>The customer chooses a vehicle, enters their name, email and phone, then a pending booking is created.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Pay a deposit online</h3>
+            <p>Stripe Checkout collects the deposit securely, then the paid status can be written back to RCM.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Pick up and start your journey</h3>
+            <p>Arrive at the branch, complete the final check and start your trip.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="rental-info" class="section rental-info">
+        <div class="section-heading">
+          <p class="eyebrow">Rental Info</p>
+          <h2>Clear information before customers book</h2>
+        </div>
+        <div class="info-columns">
+          <article>
+            <h3>Terms & Conditions</h3>
+            <p>Add your licence, age, bond, fuel, cancellation and late return rules here so customers can review them before checkout.</p>
+          </article>
+          <article>
+            <h3>Insurance Option</h3>
+            <p>Show standard cover, excess reduction options and any daily insurance pricing returned by Rental Car Manager.</p>
+          </article>
+          <article>
+            <h3>Pick-up and Drop-off</h3>
+            <p>Explain Hornby office collection, airport shuttle steps, after-hours instructions and what customers need to bring.</p>
+          </article>
+          <article>
+            <h3>Online Deposit</h3>
+            <p>Customers can pay the configured deposit online through Stripe Checkout, while the remaining balance can be due on pick-up.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="support" class="support-band">
+        <div>
+          <p class="eyebrow">About Blue Rental</p>
+          <h2>Value, reliability and stress-free travel</h2>
+        </div>
+        <ul>
+          <li>Based in Christchurch, New Zealand</li>
+          <li>Vehicles for South Island journeys and business use</li>
+          <li>Phone: 03 281 8858</li>
+          <li>Email: info@bluerental.co.nz</li>
+          <li>Friendly local support</li>
+          <li>Monday - Sunday, 9:30am - 5:00pm</li>
+          <li>Excluding public holidays</li>
+          <li>249 Main South Rd Hornby, Christchurch 8042</li>
+        </ul>
+      </section>
+    </main>
+
+    <dialog id="customerDialog">
+      <form id="customerForm" method="dialog" class="customer-form">
+        <button class="icon-close" type="button" aria-label="Close">x</button>
+        <p class="eyebrow">Secure Booking</p>
+        <h2>Confirm booking and pay deposit</h2>
+        <div id="selectedSummary" class="selected-summary"></div>
+        <label>
+          Name
+          <input name="name" placeholder="Full name" required>
+        </label>
+        <label>
+          Email
+          <input name="email" type="email" placeholder="name@example.com" required>
+        </label>
+        <label>
+          Phone
+          <input name="phone" type="tel" placeholder="+64" required>
+        </label>
+        <button class="button primary" type="submit">Book and Pay Deposit</button>
+        <p class="fine-print">Payments are handled by Stripe Checkout. Without a Stripe key, this demo redirects to a simulated success page.</p>
+      </form>
+    </dialog>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

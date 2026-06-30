@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deposit received | Blue Rental</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body class="success-page">
+    <main class="success-panel">
+      <a class="brand logo-mark" href="./index.html" aria-label="Blue Rental home">
+        <img src="./assets/logo/blue-rental-logo-transparent-cropped.png" alt="Blue Rental">
+      </a>
+      <h1>Deposit payment submitted</h1>
+      <p>Your booking request has been received. A confirmation email can be sent to the customer, and the payment status can be synced back to Rental Car Manager.</p>
+      <p class="booking-ref">Booking reference: <span id="bookingRef">Loading</span></p>
+      <a class="button primary" href="./index.html">Back to home</a>
+    </main>
+    <script>
+      const params = new URLSearchParams(location.search);
+      document.getElementById('bookingRef').textContent = params.get('booking') || 'Pending';
+    </script>
+  </body>
+</html>

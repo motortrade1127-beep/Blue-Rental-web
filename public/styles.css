@@ -1,0 +1,721 @@
+:root {
+  color-scheme: light;
+  --ink: #12333f;
+  --muted: #5e7078;
+  --line: #d7e4e8;
+  --panel: #ffffff;
+  --soft: #f1f8fa;
+  --accent: #1198b7;
+  --accent-dark: #0a6379;
+  --orange: #ff8500;
+  --orange-dark: #dc6900;
+  --gold: #ff9a1f;
+  --danger: #b42318;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #fbfcfc;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 104px;
+  padding: 0 48px;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(18, 51, 63, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  font-weight: 800;
+  letter-spacing: 0;
+  font-size: 1.05rem;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 285px;
+  height: 96px;
+  padding: 0;
+  background: transparent;
+}
+
+.logo-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.header-action {
+  color: var(--orange-dark);
+  font-weight: 700;
+}
+
+.language-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.language-switch button {
+  min-width: 42px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.language-switch button.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.hero {
+  min-height: max(570px, calc(100vh - 160px));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+  align-items: end;
+  gap: 32px;
+  padding: 80px 48px 40px;
+  background:
+    linear-gradient(90deg, rgba(238, 251, 255, 0.82), rgba(238, 251, 255, 0.46), rgba(238, 251, 255, 0.12)),
+    url("https://images.unsplash.com/photo-1471958680802-1345a694ba6d?auto=format&fit=crop&w=2200&q=90") center / cover;
+}
+
+.hero-overlay {
+  max-width: 760px;
+  color: var(--ink);
+  padding-bottom: 48px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 760px;
+  margin-bottom: 18px;
+  font-size: clamp(2.45rem, 5vw, 4.7rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: clamp(1.8rem, 3.2vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+h3 {
+  margin-bottom: 8px;
+  font-size: 1.12rem;
+}
+
+.hero-copy {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: #254853;
+  font-size: 1.16rem;
+  line-height: 1.65;
+}
+
+.booking-panel,
+.customer-form {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 70px rgba(5, 18, 24, 0.22);
+}
+
+.booking-panel {
+  border-radius: 8px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: #314149;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #cbd5da;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 6px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.button.primary {
+  color: #132c35;
+  background: var(--orange);
+}
+
+.button.primary:hover {
+  background: var(--orange-dark);
+  color: #fff;
+}
+
+.trust-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.trust-strip div {
+  min-height: 112px;
+  padding: 28px 48px;
+  border-right: 1px solid var(--line);
+}
+
+.trust-strip strong {
+  display: block;
+  font-size: 1.65rem;
+}
+
+.trust-strip span,
+.section-heading p,
+.steps p,
+.support-band li,
+.fine-print {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.section {
+  padding: 80px 48px;
+}
+
+.section-heading {
+  max-width: 720px;
+  margin-bottom: 34px;
+}
+
+.about-section,
+.locations-section,
+.rental-info {
+  background: #fff;
+}
+
+.reviews-section {
+  overflow: hidden;
+  padding: 72px 0;
+  background: #12333f;
+  color: #fff;
+}
+
+.review-intro {
+  max-width: 780px;
+  padding: 0 48px 28px;
+}
+
+.review-intro p:last-child {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.65;
+}
+
+.review-marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.review-marquee::before,
+.review-marquee::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  width: 90px;
+  height: 100%;
+  pointer-events: none;
+}
+
+.review-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, #12333f, rgba(18, 51, 63, 0));
+}
+
+.review-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, #12333f, rgba(18, 51, 63, 0));
+}
+
+.review-track {
+  display: flex;
+  width: max-content;
+  gap: 16px;
+  padding: 18px 16px;
+  animation: review-scroll 42s linear infinite;
+}
+
+.review-marquee:hover .review-track {
+  animation-play-state: paused;
+}
+
+.review-track article {
+  width: 310px;
+  min-height: 118px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.review-track strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.review-track span {
+  display: block;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.5;
+}
+
+@keyframes review-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.feature-grid,
+.location-grid,
+.info-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.feature-grid article,
+.location-grid article,
+.info-columns article {
+  min-height: 190px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.feature-grid p,
+.location-grid p,
+.info-columns p,
+.vehicle-description {
+  color: var(--muted);
+  line-height: 1.62;
+}
+
+.location-code {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: var(--accent-dark);
+  background: #e4f7fb;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rental-info .info-columns {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rental-info article {
+  min-height: 220px;
+  background: var(--soft);
+}
+
+.status {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.status.error {
+  color: var(--danger);
+  background: #fff4f2;
+  border-color: #f5c1ba;
+}
+
+.fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.vehicle-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.vehicle-card img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+}
+
+.vehicle-body {
+  padding: 20px;
+}
+
+.vehicle-top {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.badge {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--accent-dark);
+  background: #e4f7fb;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.specs span {
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.vehicle-description {
+  min-height: 78px;
+  margin-bottom: 0;
+  font-size: 0.94rem;
+}
+
+.price-row {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: 850;
+}
+
+.deposit {
+  color: var(--orange-dark);
+  font-weight: 800;
+  text-align: right;
+}
+
+.process {
+  background: var(--soft);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.steps article {
+  min-height: 210px;
+  padding: 28px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.steps span {
+  display: block;
+  margin-bottom: 26px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.support-band {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 40px;
+  padding: 72px 48px;
+  color: #fff;
+  background: #12333f;
+}
+
+.support-band ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 26px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.support-band li {
+  color: rgba(255, 255, 255, 0.78);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  padding-top: 16px;
+}
+
+dialog {
+  width: min(560px, calc(100% - 28px));
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+}
+
+dialog::backdrop {
+  background: rgba(8, 18, 22, 0.66);
+}
+
+.customer-form {
+  position: relative;
+  border: 0;
+  border-radius: 8px;
+}
+
+.icon-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--soft);
+  cursor: pointer;
+  font-size: 1.4rem;
+}
+
+.selected-summary {
+  padding: 14px;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.success-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(rgba(18, 51, 63, 0.72), rgba(18, 51, 63, 0.72)),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=85") center / cover;
+}
+
+.success-panel {
+  width: min(620px, 100%);
+  padding: 36px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.booking-ref {
+  padding: 14px;
+  border-radius: 6px;
+  background: var(--soft);
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    padding: 0 20px;
+  }
+
+  nav {
+    display: none;
+  }
+
+  .site-header {
+    gap: 12px;
+  }
+
+  .language-switch button {
+    min-width: 38px;
+    padding: 0 8px;
+  }
+
+  .logo-mark {
+    width: 190px;
+    height: 64px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 44px 20px 24px;
+  }
+
+  .hero-overlay {
+    padding-bottom: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 12vw, 3.1rem);
+  }
+
+  .hero-copy {
+    font-size: 1.02rem;
+  }
+
+  .booking-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .booking-panel .button {
+    grid-column: 1 / -1;
+  }
+
+  .booking-panel label {
+    min-width: 0;
+    font-size: 0.82rem;
+  }
+
+  .booking-panel input,
+  .booking-panel select {
+    min-height: 44px;
+    padding: 0 9px;
+    font-size: 0.9rem;
+  }
+
+  .trust-strip,
+  .fleet-grid,
+  .steps,
+  .feature-grid,
+  .location-grid,
+  .info-columns,
+  .rental-info .info-columns,
+  .support-band,
+  .support-band ul {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-strip div {
+    min-height: auto;
+    padding: 22px 20px;
+    border-right: 0;
+  }
+
+  .section,
+  .support-band,
+  .reviews-section {
+    padding: 56px 20px;
+  }
+
+  .review-intro {
+    padding: 0 0 22px;
+  }
+
+  .review-marquee {
+    margin: 0 -20px;
+    width: calc(100% + 40px);
+  }
+
+  .review-track article {
+    width: 270px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+  }
+}
