@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vehicles | Blue Rental</title>
+    <meta name="description" content="Blue Rental vehicle categories, live availability search and online deposit booking.">
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand logo-mark" href="./index.html" aria-label="Blue Rental home">
+        <img src="./assets/logo/blue-rental-logo-transparent-cropped.png" alt="Blue Rental">
+      </a>
+      <nav aria-label="Primary">
+        <a href="./index.html#about">About</a>
+        <a href="./index.html#reviews">Reviews</a>
+        <a href="./vehicles.html" aria-current="page">Vehicles</a>
+        <a href="./index.html#locations">Locations</a>
+        <a href="./insurance.html">Insurance</a>
+        <a href="./index.html#rental-info">Rental Info</a>
+        <a href="./index.html#support">Support</a>
+      </nav>
+      <div class="language-switch" aria-label="Language switch">
+        <button type="button" data-lang-toggle="en" class="active">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <a class="header-action" href="#booking">Book Now</a>
+    </header>
+
+    <main>
+      <section class="vehicle-hero">
+        <div class="section-heading">
+          <p class="eyebrow">Our Vehicles</p>
+          <h1>Find the right Blue Rental vehicle</h1>
+          <p>Search dates and locations to view available vehicle categories, pricing and the 10% online deposit amount.</p>
+        </div>
+        <form id="booking" class="booking-panel" autocomplete="on" data-auto-search="true">
+          <label>
+            Pick-up location
+            <select name="pickupLocation">
+              <option>Christchurch</option>
+              <option>Queenstown</option>
+            </select>
+          </label>
+          <label>
+            Drop-off location
+            <select name="returnLocation">
+              <option>Christchurch</option>
+              <option>Queenstown</option>
+            </select>
+          </label>
+          <label>
+            Pick-up date
+            <input name="pickupDate" type="date" required>
+          </label>
+          <label>
+            Drop-off date
+            <input name="returnDate" type="date" required>
+          </label>
+          <button class="button primary" type="submit">Search Vehicles</button>
+        </form>
+      </section>
+
+      <section id="fleet" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Our Vehicles</p>
+          <h2>Super eco, compact, sedans, wagons, SUVs and luxury SUVs</h2>
+          <p>We offer super eco, compact, middle size sedan, wagon, SUVs, 4x4 and luxury SUVs for different travel needs.</p>
+        </div>
+        <div id="status" class="status">Select your dates to search available vehicles.</div>
+        <div id="fleetGrid" class="fleet-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <dialog id="customerDialog">
+      <form id="customerForm" method="dialog" class="customer-form">
+        <button class="icon-close" type="button" aria-label="Close">x</button>
+        <p class="eyebrow">Secure Booking</p>
+        <h2>Confirm booking and pay deposit</h2>
+        <div id="selectedSummary" class="selected-summary"></div>
+        <label>
+          Name
+          <input name="name" placeholder="Full name" required>
+        </label>
+        <label>
+          Email
+          <input name="email" type="email" placeholder="name@example.com" required>
+        </label>
+        <label>
+          Phone
+          <input name="phone" type="tel" placeholder="+64" required>
+        </label>
+        <button class="button primary" type="submit">Book and Pay Deposit</button>
+        <p class="fine-print">Payments are handled by Stripe Checkout. Without a Stripe key, this demo redirects to a simulated success page.</p>
+      </form>
+    </dialog>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

@@ -489,6 +489,7 @@ function tr() {
 }
 
 function setDefaultDates() {
+  if (!form) return;
   const today = new Date();
   const pickup = new Date(today);
   pickup.setDate(today.getDate() + 2);
@@ -496,6 +497,15 @@ function setDefaultDates() {
   dropoff.setDate(today.getDate() + 6);
   form.elements.pickupDate.value = pickup.toISOString().slice(0, 10);
   form.elements.returnDate.value = dropoff.toISOString().slice(0, 10);
+}
+
+function applySearchParams() {
+  if (!form) return;
+  const params = new URLSearchParams(location.search);
+  ['pickupLocation', 'returnLocation', 'pickupDate', 'returnDate'].forEach((key) => {
+    const value = params.get(key);
+    if (value && form.elements[key]) form.elements[key].value = value;
+  });
 }
 
 function formDataToObject(formElement) {
@@ -516,12 +526,14 @@ function setLabelText(label, value) {
 
 function setStatusKey(key, type = 'normal') {
   statusState = { key, type };
+  if (!statusBox) return;
   statusBox.textContent = tr().status[key];
   statusBox.classList.toggle('error', type === 'error');
 }
 
 function setStatusText(message, type = 'normal') {
   statusState = { text: message, type };
+  if (!statusBox) return;
   statusBox.textContent = message;
   statusBox.classList.toggle('error', type === 'error');
 }
@@ -534,6 +546,7 @@ function localizeVehicle(vehicle) {
 function renderReviews() {
   const reviews = [...tr().reviews.items, ...tr().reviews.items];
   const track = document.querySelector('.review-track');
+  if (!track) return;
   track.innerHTML = reviews.map(([title, copy]) => `
     <article><strong>${title}</strong><span>${copy}</span></article>
   `).join('');
@@ -633,6 +646,7 @@ function applyLanguage() {
 }
 
 function renderFleet(vehicles) {
+  if (!fleetGrid) return;
   window.latestVehicles = vehicles;
   const t = tr();
   fleetGrid.innerHTML = vehicles.map((baseVehicle) => {
@@ -682,28 +696,36 @@ async function postJson(url, data) {
   return payload;
 }
 
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  currentSearch = formDataToObject(form);
+if (form) {
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    currentSearch = formDataToObject(form);
 
-  if (new Date(currentSearch.returnDate) <= new Date(currentSearch.pickupDate)) {
-    setStatusKey('dateError', 'error');
-    return;
-  }
+    if (!fleetGrid || !statusBox) {
+      const params = new URLSearchParams(currentSearch);
+      window.location.href = `./vehicles.html?${params.toString()}#fleet`;
+      return;
+    }
 
-  setStatusKey('searching');
-  fleetGrid.innerHTML = '';
+    if (new Date(currentSearch.returnDate) <= new Date(currentSearch.pickupDate)) {
+      setStatusKey('dateError', 'error');
+      return;
+    }
 
-  try {
-    const result = await postJson('/api/availability', currentSearch);
-    renderFleet(result.vehicles);
-    setStatusKey(result.source === 'rcm' ? 'rcm' : 'demo');
-  } catch (error) {
-    setStatusText(error.message, 'error');
-  }
-});
+    setStatusKey('searching');
+    fleetGrid.innerHTML = '';
 
-fleetGrid.addEventListener('click', (event) => {
+    try {
+      const result = await postJson('/api/availability', currentSearch);
+      renderFleet(result.vehicles);
+      setStatusKey(result.source === 'rcm' ? 'rcm' : 'demo');
+    } catch (error) {
+      setStatusText(error.message, 'error');
+    }
+  });
+}
+
+if (fleetGrid) fleetGrid.addEventListener('click', (event) => {
   const button = event.target.closest('[data-book]');
   if (!button) return;
 
@@ -722,7 +744,7 @@ fleetGrid.addEventListener('click', (event) => {
   dialog.showModal();
 });
 
-customerForm.addEventListener('submit', async (event) => {
+if (customerForm) customerForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!selectedVehicle) return;
 
@@ -765,8 +787,9 @@ document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
   });
 });
 
-closeButton.addEventListener('click', () => dialog.close());
+if (closeButton && dialog) closeButton.addEventListener('click', () => dialog.close());
 
 setDefaultDates();
+applySearchParams();
 applyLanguage();
-form.requestSubmit();
+if (form?.dataset.autoSearch === 'true') form.requestSubmit();
