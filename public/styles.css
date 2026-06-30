@@ -411,6 +411,48 @@ select {
   color: var(--ink);
 }
 
+.admin-section {
+  background: #fff;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 420px) auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.record-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.record-card dl {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.record-card dt {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.record-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .reviews-section {
   overflow: hidden;
   padding: 72px 0;
@@ -796,6 +838,15 @@ dialog::backdrop {
   .insurance-notes {
     grid-template-columns: 1fr;
     gap: 18px;
+  }
+
+  .admin-form,
+  .records-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .record-card dl {
+    grid-template-columns: 1fr;
   }
 
   .hero-overlay {

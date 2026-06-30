@@ -44,6 +44,42 @@ For local preview without real payment:
 PAYMENT_PROVIDER=demo
 ```
 
+When a payment completes, the app records the booking and payment status in `data/bookings.json`.
+The `data/` folder is ignored by Git so customer details are not committed.
+
+To view records online, open:
+
+```text
+/admin-payments.html
+```
+
+Set an admin token in Render and use it on that page:
+
+```text
+ADMIN_TOKEN=choose_a_private_password
+```
+
+## Email notifications
+
+Email is optional. If SMTP details are configured, the app sends:
+
+- a notification email to Blue Rental
+- a deposit received email to the customer
+
+Render environment variables:
+
+```text
+BUSINESS_NOTIFICATION_EMAIL=info@bluerental.co.nz
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_username
+SMTP_PASS=your_smtp_password
+SMTP_FROM=Blue Rental <info@bluerental.co.nz>
+```
+
+If SMTP is not configured, bookings and payment status are still recorded, but no email is sent.
+
 ## Rental Car Manager
 
 Set RCM sandbox/live details and disable demo data:
@@ -83,6 +119,8 @@ PXPAY_KEY=your_full_pxpay_key2
 PXPAY_ENDPOINT=https://sec.windcave.com/pxaccess/pxpay.aspx
 DEPOSIT_PERCENT=10
 PAYMENT_CURRENCY=NZD
+ADMIN_TOKEN=choose_a_private_password
+BUSINESS_NOTIFICATION_EMAIL=info@bluerental.co.nz
 RCM_USE_DEMO_DATA=true
 SITE_URL=https://your-render-service.onrender.com
 ```

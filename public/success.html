@@ -12,13 +12,17 @@
         <img src="./assets/logo/blue-rental-logo-transparent-cropped.png" alt="Blue Rental">
       </a>
       <h1>Deposit payment submitted</h1>
-      <p>Your booking request has been received. A confirmation email can be sent to the customer, and the payment status can be synced back to Rental Car Manager.</p>
+      <p>Your booking request has been received. If online payment was completed, the deposit status, time and transaction reference have been recorded.</p>
       <p class="booking-ref">Booking reference: <span id="bookingRef">Loading</span></p>
+      <p class="booking-ref">Payment provider: <span id="provider">Loading</span></p>
+      <p class="booking-ref">Transaction reference: <span id="txn">Loading</span></p>
       <a class="button primary" href="./index.html">Back to home</a>
     </main>
     <script>
       const params = new URLSearchParams(location.search);
       document.getElementById('bookingRef').textContent = params.get('booking') || 'Pending';
+      document.getElementById('provider').textContent = params.get('provider') || (params.get('demo') ? 'Demo' : 'Pending');
+      document.getElementById('txn').textContent = params.get('txn') || (params.get('demo') ? 'Demo payment' : 'Pending');
     </script>
   </body>
 </html>

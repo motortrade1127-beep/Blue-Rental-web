@@ -1,5 +1,8 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import nodemailer from 'nodemailer';
 import express from 'express';
 
 const app = express();
@@ -11,6 +14,27 @@ const pxpayUserId = process.env.PXPAY_USER_ID || '';
 const pxpayKey = process.env.PXPAY_KEY || '';
 const pxpayEndpoint = process.env.PXPAY_ENDPOINT || 'https://sec.windcave.com/pxaccess/pxpay.aspx';
 const pxpayEnabled = Boolean(pxpayUserId && pxpayKey && !pxpayKey.includes('replace_me'));
+const dataDir = path.join(process.cwd(), 'data');
+const bookingsFile = path.join(dataDir, 'bookings.json');
+const adminToken = process.env.ADMIN_TOKEN || '';
+const businessEmail = process.env.BUSINESS_NOTIFICATION_EMAIL || '';
+
+const smtpConfigured = Boolean(
+  process.env.SMTP_HOST &&
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASS &&
+  !process.env.SMTP_HOST.includes('replace_me')
+);
+
+const mailer = smtpConfigured ? nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: String(process.env.SMTP_SECURE || 'false') === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+}) : null;
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -24,6 +48,115 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static('public'));
+
+async function readBookings() {
+  try {
+    const data = await fs.readFile(bookingsFile, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+async function writeBookings(bookings) {
+  await fs.mkdir(dataDir, { recursive: true });
+  await fs.writeFile(bookingsFile, JSON.stringify(bookings, null, 2));
+}
+
+async function upsertBooking(bookingId, update) {
+  const bookings = await readBookings();
+  const index = bookings.findIndex((booking) => booking.bookingId === bookingId);
+  const now = new Date().toISOString();
+  const existing = index >= 0 ? bookings[index] : { bookingId, createdAt: now };
+  const next = {
+    ...existing,
+    ...update,
+    search: { ...(existing.search || {}), ...(update.search || {}) },
+    vehicle: { ...(existing.vehicle || {}), ...(update.vehicle || {}) },
+    customer: { ...(existing.customer || {}), ...(update.customer || {}) },
+    payment: { ...(existing.payment || {}), ...(update.payment || {}) },
+    bookingId,
+    updatedAt: now
+  };
+
+  if (index >= 0) bookings[index] = next;
+  else bookings.unshift(next);
+
+  await writeBookings(bookings);
+  return next;
+}
+
+async function getBooking(bookingId) {
+  const bookings = await readBookings();
+  return bookings.find((booking) => booking.bookingId === bookingId);
+}
+
+async function sendMail({ to, subject, text }) {
+  if (!mailer || !to) return { skipped: true };
+  return mailer.sendMail({
+    from: process.env.SMTP_FROM || businessEmail || process.env.SMTP_USER,
+    to,
+    subject,
+    text
+  });
+}
+
+function bookingText(booking) {
+  const customer = booking.customer || {};
+  const search = booking.search || {};
+  const vehicle = booking.vehicle || {};
+  const payment = booking.payment || {};
+
+  return [
+    `Booking reference: ${booking.bookingId}`,
+    `Status: ${booking.status}`,
+    `Paid at: ${payment.paidAt || 'Not paid'}`,
+    `Deposit paid: ${payment.deposit ? `NZD ${payment.deposit}` : 'Pending'}`,
+    `Total: ${vehicle.total ? `NZD ${vehicle.total}` : 'Pending'}`,
+    `Vehicle: ${vehicle.name || 'Vehicle pending'}`,
+    `Dates: ${search.pickupDate || ''} - ${search.returnDate || ''}`,
+    `Route: ${search.pickupLocation || ''} to ${search.returnLocation || ''}`,
+    `Customer: ${customer.name || ''}`,
+    `Email: ${customer.email || ''}`,
+    `Phone: ${customer.phone || ''}`,
+    `Windcave Txn: ${payment.dpsTxnRef || payment.txnId || ''}`
+  ].join('\n');
+}
+
+async function notifyDepositPaid(booking) {
+  const customerEmail = booking.customer?.email;
+  const ownerSubject = `Blue Rental deposit paid - ${booking.bookingId}`;
+  const customerSubject = `Blue Rental deposit received - ${booking.bookingId}`;
+  const ownerBody = `A customer has paid a booking deposit.\n\n${bookingText(booking)}`;
+  const customerBody = [
+    'Thank you. Your Blue Rental deposit has been received.',
+    '',
+    bookingText(booking),
+    '',
+    'Our team will confirm the remaining details before pick-up.'
+  ].join('\n');
+
+  await Promise.allSettled([
+    sendMail({ to: businessEmail, subject: ownerSubject, text: ownerBody }),
+    sendMail({ to: customerEmail, subject: customerSubject, text: customerBody })
+  ]);
+}
+
+function requireAdmin(req, res, next) {
+  if (!adminToken) {
+    res.status(503).json({ error: 'ADMIN_TOKEN is not configured.' });
+    return;
+  }
+
+  const token = req.get('x-admin-token') || req.query.token;
+  if (token !== adminToken) {
+    res.status(401).json({ error: 'Invalid admin token.' });
+    return;
+  }
+
+  next();
+}
 
 const demoFleet = [
   {
@@ -317,6 +450,14 @@ app.post('/api/bookings', async (req, res) => {
     const rcmResult = await callRcm('/v3.2/bookings', booking);
 
     const bookingId = rcmResult?.bookingId || `BLU-${Date.now().toString().slice(-6)}`;
+    await upsertBooking(bookingId, {
+      source: rcmResult ? 'rcm' : 'demo',
+      status: 'deposit_pending',
+      search: booking.search,
+      vehicle: booking.vehicle,
+      customer: booking.customer
+    });
+
     res.json({
       bookingId,
       source: rcmResult ? 'rcm' : 'demo',
@@ -332,6 +473,18 @@ app.post('/api/pay-deposit', async (req, res) => {
   const provider = paymentProvider || (pxpayEnabled ? 'pxpay' : 'demo');
 
   if (provider === 'demo') {
+    const paidAt = new Date().toISOString();
+    const booking = await upsertBooking(bookingId, {
+      status: 'deposit_paid_demo',
+      payment: {
+        provider: 'demo',
+        deposit: Number(deposit),
+        total: Number(total),
+        paidAt
+      }
+    });
+    await notifyDepositPaid(booking);
+
     res.json({
       mode: 'demo',
       checkoutUrl: `${siteUrl}/success.html?booking=${encodeURIComponent(bookingId)}&demo=true`
@@ -350,6 +503,18 @@ app.post('/api/pay-deposit', async (req, res) => {
   }
 
   try {
+    await upsertBooking(bookingId, {
+      status: 'payment_started',
+      payment: {
+        provider: 'pxpay',
+        deposit: Number(deposit),
+        total: Number(total),
+        startedAt: new Date().toISOString(),
+        customerEmail,
+        vehicleName
+      }
+    });
+
     const checkoutUrl = await createPxpayPayment({ bookingId, vehicleName, deposit, total, customerEmail });
     res.json({ mode: 'pxpay', checkoutUrl });
   } catch (error) {
@@ -371,14 +536,55 @@ app.get('/payment/pxpay-result', async (req, res) => {
     const reference = result.merchantReference || bookingId;
 
     if (result.valid && result.success) {
+      const booking = await upsertBooking(reference, {
+        status: 'deposit_paid',
+        payment: {
+          provider: 'pxpay',
+          paidAt: new Date().toISOString(),
+          dpsTxnRef: result.dpsTxnRef,
+          txnId: result.txnId,
+          responseText: result.responseText
+        }
+      });
+      await notifyDepositPaid(booking);
+
       res.redirect(`/success.html?booking=${encodeURIComponent(reference)}&provider=pxpay&txn=${encodeURIComponent(result.dpsTxnRef || result.txnId || '')}`);
       return;
     }
 
+    await upsertBooking(reference, {
+      status: 'payment_failed',
+      payment: {
+        provider: 'pxpay',
+        failedAt: new Date().toISOString(),
+        txnId: result.txnId,
+        dpsTxnRef: result.dpsTxnRef,
+        responseText: result.responseText || 'Payment was not approved'
+      }
+    });
+
     res.redirect(`/payment-failed.html?booking=${encodeURIComponent(reference)}&reason=${encodeURIComponent(result.responseText || 'Payment was not approved')}`);
   } catch (error) {
+    await upsertBooking(bookingId, {
+      status: 'payment_error',
+      payment: {
+        provider: 'pxpay',
+        failedAt: new Date().toISOString(),
+        responseText: error.message
+      }
+    });
+
     res.redirect(`/payment-failed.html?booking=${encodeURIComponent(bookingId)}&reason=${encodeURIComponent(error.message)}`);
   }
+});
+
+app.get('/api/payment-records', requireAdmin, async (req, res) => {
+  const bookings = await readBookings();
+  res.json({
+    records: bookings
+      .slice()
+      .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))
+  });
 });
 
 app.listen(port, () => {

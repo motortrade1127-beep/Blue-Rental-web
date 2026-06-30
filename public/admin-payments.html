@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payment Records | Blue Rental</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand logo-mark" href="./index.html" aria-label="Blue Rental home">
+        <img src="./assets/logo/blue-rental-logo-transparent-cropped.png" alt="Blue Rental">
+      </a>
+      <nav aria-label="Primary">
+        <a href="./index.html">Home</a>
+        <a href="./vehicles.html">Vehicles</a>
+        <a href="./insurance.html">Insurance</a>
+      </nav>
+      <a class="header-action" href="./index.html#booking">Book Now</a>
+    </header>
+
+    <main>
+      <section class="section admin-section">
+        <div class="section-heading">
+          <p class="eyebrow">Admin</p>
+          <h1>Payment records</h1>
+          <p>Enter the admin token from Render Environment Variables to view deposit payment status and customer details.</p>
+        </div>
+
+        <form id="adminForm" class="admin-form">
+          <label>
+            Admin token
+            <input name="token" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="button primary" type="submit">Load records</button>
+        </form>
+
+        <div id="adminStatus" class="status">Payment records will appear here after loading.</div>
+        <div id="records" class="records-grid"></div>
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById('adminForm');
+      const records = document.getElementById('records');
+      const statusBox = document.getElementById('adminStatus');
+
+      function money(value) {
+        if (!value && value !== 0) return 'Pending';
+        return new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD' }).format(value);
+      }
+
+      function formatDate(value) {
+        if (!value) return 'Not recorded';
+        return new Date(value).toLocaleString('en-NZ', { dateStyle: 'medium', timeStyle: 'short' });
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const token = new FormData(form).get('token');
+        statusBox.textContent = 'Loading payment records...';
+        records.innerHTML = '';
+
+        try {
+          const response = await fetch('/api/payment-records', {
+            headers: { 'x-admin-token': token }
+          });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error || 'Unable to load records');
+
+          statusBox.textContent = `${payload.records.length} record(s) found.`;
+          records.innerHTML = payload.records.map((record) => {
+            const customer = record.customer || {};
+            const vehicle = record.vehicle || {};
+            const search = record.search || {};
+            const payment = record.payment || {};
+            return `
+              <article class="record-card">
+                <div>
+                  <p class="eyebrow">${record.status || 'pending'}</p>
+                  <h3>${record.bookingId}</h3>
+                </div>
+                <dl>
+                  <dt>Customer</dt><dd>${customer.name || 'Not recorded'}</dd>
+                  <dt>Email</dt><dd>${customer.email || 'Not recorded'}</dd>
+                  <dt>Phone</dt><dd>${customer.phone || 'Not recorded'}</dd>
+                  <dt>Vehicle</dt><dd>${vehicle.name || payment.vehicleName || 'Not recorded'}</dd>
+                  <dt>Dates</dt><dd>${search.pickupDate || ''} - ${search.returnDate || ''}</dd>
+                  <dt>Deposit</dt><dd>${money(payment.deposit)}</dd>
+                  <dt>Paid at</dt><dd>${formatDate(payment.paidAt)}</dd>
+                  <dt>Windcave ref</dt><dd>${payment.dpsTxnRef || payment.txnId || 'Not recorded'}</dd>
+                </dl>
+              </article>
+            `;
+          }).join('');
+        } catch (error) {
+          statusBox.textContent = error.message;
+          statusBox.classList.add('error');
+        }
+      });
+    </script>
+  </body>
+</html>
