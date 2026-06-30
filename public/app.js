@@ -20,7 +20,7 @@ const money = new Intl.NumberFormat('en-NZ', {
 const i18n = {
   en: {
     title: 'Blue Rental | Affordable Car Rentals in New Zealand',
-    nav: ['About', 'Reviews', 'Vehicles', 'Locations', 'Rental Info', 'Support'],
+    nav: ['About', 'Reviews', 'Vehicles', 'Locations', 'Insurance', 'Rental Info', 'Support'],
     headerAction: 'Book Now',
     heroEyebrow: 'Christchurch & South Island Car Hire',
     heroTitle: 'Explore New Zealand with Blue Rental',
@@ -83,6 +83,7 @@ const i18n = {
     rentalInfo: {
       eyebrow: 'Rental Info',
       title: 'Clear information before customers book',
+      insuranceLink: 'View insurance options',
       cards: [
         ['Terms & Conditions', 'Add your licence, age, bond, fuel, cancellation and late return rules here so customers can review them before checkout.'],
         ['Insurance Option', 'Show standard cover, excess reduction options and any daily insurance pricing returned by Rental Car Manager.'],
@@ -138,7 +139,7 @@ const i18n = {
   },
   zh: {
     title: 'Blue Rental | 新西兰实惠租车',
-    nav: ['关于我们', '客户评价', '车辆', '取还车地点', '租车信息', '客服支持'],
+    nav: ['关于我们', '客户评价', '车辆', '取还车地点', '保险', '租车信息', '客服支持'],
     headerAction: '立即预订',
     heroEyebrow: '基督城与南岛租车',
     heroTitle: '和 Blue Rental 一起探索新西兰',
@@ -201,6 +202,7 @@ const i18n = {
     rentalInfo: {
       eyebrow: '租车信息',
       title: '预订前清楚了解关键信息',
+      insuranceLink: '查看保险选项',
       cards: [
         ['租车条款', '可在这里补充驾照、年龄、押金、油量、取消政策和逾期还车规则。'],
         ['保险选项', '展示基础保险、降低垫底费选项，以及 RCM 返回的每日保险价格。'],
@@ -609,6 +611,7 @@ function applyLanguage() {
     article.querySelector('h3').textContent = t.rentalInfo.cards[index][0];
     article.querySelector('p').textContent = t.rentalInfo.cards[index][1];
   });
+  setText('[data-insurance-link]', t.rentalInfo.insuranceLink);
 
   setText('#support .eyebrow', t.support.eyebrow);
   setText('#support h2', t.support.title);
