@@ -834,6 +834,10 @@ dialog::backdrop {
   font-size: 0.84rem;
 }
 
+.extras-row[hidden] {
+  display: none;
+}
+
 .extras-row:first-child {
   border-top: 0;
 }
@@ -864,6 +868,18 @@ dialog::backdrop {
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.included-notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #ffd3c6;
+  border-radius: 6px;
+  color: #9a3412;
+  background: #fff3ed;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .insurance-options {

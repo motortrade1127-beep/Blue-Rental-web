@@ -152,6 +152,7 @@ const i18n = {
       deposit: 'Deposit',
       extras: 'Optional extras',
       insurance: 'Insurance options',
+      roadsideIncluded: 'Roadside assistance is included in your selected cover, so you do not need to buy it again.',
       excess: 'Excess',
       bond: 'Bond',
       qty: 'Qty',
@@ -435,6 +436,7 @@ i18n.zh.dialog.ageNotice = '抱歉，由于保险政策要求，我们暂时不�
 Object.assign(i18n.zh.vehicle, {
   extras: '可选服务',
   insurance: '保险选项',
+  roadsideIncluded: '您选择的保险已包括道路救援，无需重复购买。',
   excess: '垫底费',
   bond: '预授权/押金',
   qty: '数量',
@@ -668,9 +670,16 @@ function renderSelectedSummary() {
 
 function syncExtrasForInsurance() {
   const selectedInsuranceId = insurancePanel?.querySelector('input[name="insuranceOption"]:checked')?.value || 'standard';
+  const roadsideIncluded = ['smart', 'elite'].includes(selectedInsuranceId);
+  const notice = extrasPanel?.querySelector('[data-roadside-included]');
+  if (notice) {
+    notice.hidden = !roadsideIncluded;
+    notice.textContent = tr().vehicle.roadsideIncluded;
+  }
+
   extrasPanel?.querySelectorAll('[data-extra]').forEach((row) => {
     const isRoadside = row.dataset.extra === 'roadside';
-    const hidden = ['smart', 'elite'].includes(selectedInsuranceId) && isRoadside;
+    const hidden = roadsideIncluded && isRoadside;
     row.hidden = hidden;
     if (hidden) {
       const checkbox = row.querySelector('input[type="checkbox"]');
@@ -688,6 +697,7 @@ function renderExtrasPanel() {
       <strong>${t.vehicle.extras}</strong>
       <span>${days} ${t.vehicle.daysTotal}</span>
     </div>
+    <p class="included-notice" data-roadside-included hidden>${t.vehicle.roadsideIncluded}</p>
     <div class="extras-table">
       <div class="extras-row extras-header">
         <span>Name</span>
