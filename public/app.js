@@ -21,9 +21,9 @@ const money = new Intl.NumberFormat('en-NZ', {
 });
 const depositPercent = 10;
 const optionalExtras = [
-  { id: 'babySeat', name: 'Baby Seat', zhName: '婴儿座椅', dailyRate: 10, defaultQty: 1 },
+  { id: 'babySeat', name: 'Baby Seat', zhName: '婴儿座椅', dailyRate: 10, defaultQty: 1, maxTotal: 100 },
   { id: 'roadside', name: 'Premium Road Side Assistance Package', zhName: '高级道路救援服务包', dailyRate: 3, defaultQty: 1 },
-  { id: 'snowChain', name: 'Snow Chain', zhName: '雪链', dailyRate: 15, defaultQty: 1 }
+  { id: 'snowChain', name: 'Snow Chain', zhName: '雪链', dailyRate: 15, defaultQty: 1, maxTotal: 100 }
 ];
 const insuranceOptions = [
   { id: 'standard', name: 'Standard Cover', zhName: '标准保险', dailyRate: 0, excess: 'NZ$4,000', bond: 'NZ$2,000' },
@@ -618,7 +618,7 @@ function calculateSelectedVehicle() {
     if (!extra || !checkbox?.checked) return;
 
     const qty = Math.max(1, Number(qtyInput?.value || extra.defaultQty || 1));
-    const total = extra.dailyRate * qty * days;
+    const total = Math.min(extra.dailyRate * qty * days, extra.maxTotal || Infinity);
     extrasTotal += total;
     selectedExtras.push({
       id: extra.id,
@@ -687,7 +687,7 @@ function renderExtrasPanel() {
           <span>${currentLang === 'zh' ? extra.zhName : extra.name}</span>
           <input type="checkbox" aria-label="${extra.name}">
           <input type="number" min="1" max="4" value="${extra.defaultQty}">
-          <span>${money.format(extra.dailyRate)}</span>
+          <span>${money.format(extra.dailyRate)}${extra.maxTotal ? `<small class="extra-cap">max ${money.format(extra.maxTotal)}</small>` : ''}</span>
           <strong data-extra-total>${money.format(0)}</strong>
         </div>
       `).join('')}
@@ -733,7 +733,7 @@ function updateExtrasTotals() {
     const totalNode = row.querySelector('[data-extra-total]');
     const extra = optionalExtras.find((item) => item.id === row.dataset.extra);
     const qty = Math.max(1, Number(qtyInput?.value || 1));
-    const total = checkbox?.checked && extra ? extra.dailyRate * qty * days : 0;
+    const total = checkbox?.checked && extra ? Math.min(extra.dailyRate * qty * days, extra.maxTotal || Infinity) : 0;
     if (totalNode) totalNode.textContent = money.format(total);
   });
   renderSelectedSummary();

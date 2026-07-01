@@ -858,6 +858,14 @@ dialog::backdrop {
   color: var(--ink);
 }
 
+.extra-cap {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .insurance-options {
   display: grid;
   gap: 10px;
