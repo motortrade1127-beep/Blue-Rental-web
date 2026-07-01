@@ -181,6 +181,12 @@ h3 {
 
 .booking-panel {
   border-radius: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+}
+
+.booking-panel .button {
+  grid-column: 1 / -1;
 }
 
 label {
@@ -1135,6 +1141,12 @@ dialog::backdrop {
 
   .chat-panel {
     bottom: 62px;
+  }
+}
+
+@media (max-width: 430px) {
+  .booking-panel {
+    grid-template-columns: 1fr;
   }
 }
 
