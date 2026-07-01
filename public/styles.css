@@ -895,6 +895,17 @@ dialog::backdrop {
   color: var(--ink);
 }
 
+.phone-input {
+  display: grid;
+  grid-template-columns: minmax(112px, 0.34fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.phone-input select,
+.phone-input input {
+  min-height: 48px;
+}
+
 .age-confirm {
   display: flex;
   grid-template-columns: none;

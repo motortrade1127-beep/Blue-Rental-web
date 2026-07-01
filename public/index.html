@@ -261,7 +261,28 @@
         </label>
         <label>
           Phone
-          <input name="phone" type="tel" placeholder="+64" required>
+          <div class="phone-input">
+            <select name="phoneCountry" aria-label="Country calling code" required>
+              <option value="" selected></option>
+              <option value="+64">🇳🇿 +64</option>
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+86">🇨🇳 +86</option>
+              <option value="+852">🇭🇰 +852</option>
+              <option value="+853">🇲🇴 +853</option>
+              <option value="+886">🇹🇼 +886</option>
+              <option value="+65">🇸🇬 +65</option>
+              <option value="+60">🇲🇾 +60</option>
+              <option value="+1">🇺🇸🇨🇦 +1</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+82">🇰🇷 +82</option>
+              <option value="+81">🇯🇵 +81</option>
+              <option value="+66">🇹🇭 +66</option>
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+33">🇫🇷 +33</option>
+            </select>
+            <input name="phone" type="tel" required>
+          </div>
         </label>
         <button class="button primary" type="submit">Book and Pay Deposit</button>
         <p class="fine-print">Payments are handled by Windcave PxPay. In demo mode, this redirects to a simulated success page.</p>

@@ -124,7 +124,7 @@ const i18n = {
       eyebrow: 'Secure Booking',
       title: 'Confirm booking and pay 10% deposit',
       labels: ['Name', 'Email', 'Phone', 'Flight number', 'Promo code'],
-      placeholders: ['Full name', 'name@example.com', '+64', 'Optional, e.g. NZ533', 'Optional'],
+      placeholders: ['Full name', 'name@example.com', '', 'Optional, e.g. NZ533', 'Optional'],
       ageConsent: "I'm over 21 years old",
       ageNotice: 'Sorry, due to our insurance policy, Blue Rental is currently unable to rent vehicles to customers under 21.',
       finePrint: 'Payments are handled by Windcave PxPay. In demo mode, this redirects to a simulated success page.'
@@ -429,7 +429,7 @@ i18n.zh.process = {
 i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间'];
 i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间'];
 i18n.zh.dialog.labels = ['姓名', '邮箱', '电话', '航班号', '优惠码'];
-i18n.zh.dialog.placeholders = ['姓名', 'name@example.com', '+64', '选填，例如 NZ533', '选填'];
+i18n.zh.dialog.placeholders = ['姓名', 'name@example.com', '', '选填，例如 NZ533', '选填'];
 i18n.zh.dialog.ageConsent = '我已年满 21 岁';
 i18n.zh.dialog.ageNotice = '抱歉，由于保险政策要求，我们暂时不对 21 岁以下的客人开放租车服务。';
 Object.assign(i18n.zh.vehicle, {
@@ -1012,6 +1012,7 @@ if (customerForm) customerForm.addEventListener('submit', async (event) => {
   if (!selectedVehicle) return;
 
   const customer = formDataToObject(customerForm);
+  customer.phone = `${customer.phoneCountry || ''} ${customer.phone || ''}`.trim();
   const ageNotice = document.getElementById('ageNotice');
   if (customer.over21Consent !== 'yes') {
     if (ageNotice) ageNotice.hidden = false;
