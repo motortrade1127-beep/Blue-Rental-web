@@ -4,10 +4,12 @@ const statusBox = document.getElementById('status');
 const dialog = document.getElementById('customerDialog');
 const customerForm = document.getElementById('customerForm');
 const selectedSummary = document.getElementById('selectedSummary');
+const extrasPanel = document.getElementById('extrasPanel');
 const closeButton = document.querySelector('.icon-close');
 
 let currentSearch = {};
 let selectedVehicle = null;
+let pricedVehicle = null;
 let currentLang = localStorage.getItem('blueRentalLang') || 'en';
 let statusState = { key: 'selectDates', type: 'normal' };
 const apiBase = location.protocol === 'file:' ? 'http://localhost:4317' : '';
@@ -16,6 +18,12 @@ const money = new Intl.NumberFormat('en-NZ', {
   style: 'currency',
   currency: 'NZD'
 });
+const depositPercent = 10;
+const optionalExtras = [
+  { id: 'babySeat', name: 'Baby Seat', zhName: '婴儿座椅', dailyRate: 10, defaultQty: 1 },
+  { id: 'roadside', name: 'Premium Road Side Assistance Package', zhName: '高级道路救援服务包', dailyRate: 3, defaultQty: 1 },
+  { id: 'snowChain', name: 'Snow Chain', zhName: '雪链', dailyRate: 15, defaultQty: 1 }
+];
 
 const i18n = {
   en: {
@@ -25,8 +33,8 @@ const i18n = {
     heroEyebrow: 'Christchurch & South Island Car Hire',
     heroTitle: 'Explore New Zealand with Blue Rental',
     heroCopy: 'Find the best cars for your journey. Affordable, well-maintained vehicles for city errands, South Island road trips and business travel.',
-    labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Pick-up time', 'Drop-off date', 'Drop-off time'],
-    fieldHints: ['', '', 'NZ local time, DD/MM/YYYY', 'NZ local time', 'NZ local time, DD/MM/YYYY', 'NZ local time'],
+    labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Pick-up time', 'Drop-off date', 'Drop-off time', 'Driver age', 'Promo code'],
+    fieldHints: ['', '', 'NZ local time, DD/MM/YYYY', 'NZ local time', 'NZ local time, DD/MM/YYYY', 'NZ local time', '21+ only. 21-25 adds NZ$20/day young driver fee.', 'Optional'],
     locations: ['Hornby Office', 'CHC Airport', 'Christchurch City', 'ZQN Airport'],
     searchButton: 'Search Vehicles',
     trust: [
@@ -122,6 +130,7 @@ const i18n = {
       selectDates: 'Select your dates to search available vehicles.',
       searching: 'Searching available Blue Rental vehicles...',
       dateError: 'Drop-off date and time must be later than pick-up date and time.',
+      ageError: 'Drivers under 21 cannot rent a vehicle from Blue Rental.',
       rcm: 'Live vehicles returned from Rental Car Manager.',
       demo: 'Demo Blue Rental inventory is showing now. Add RCM API credentials to switch to live availability.'
     },
@@ -134,6 +143,11 @@ const i18n = {
       depositToday: '10% deposit today',
       total: 'Total',
       deposit: 'Deposit',
+      extras: 'Optional extras',
+      qty: 'Qty',
+      daily: 'Daily',
+      mandatoryFee: 'Mandatory fee',
+      youngDriverFee: 'Young Driver Fee',
       connector: 'to',
       perDay: 'day'
     }
@@ -404,8 +418,16 @@ i18n.zh.process = {
     ['04', '到达门店取车开始旅程', '到达门店完成取车流程，开始您的新西兰旅程。']
   ]
 };
-i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间'];
-i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间'];
+i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间', '驾驶员年龄', '优惠码'];
+i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '仅限 21 岁以上。21-25 岁自动加 NZ$20/天 young driver fee。', '选填'];
+i18n.zh.status.ageError = '21 岁以下暂不可租车。';
+Object.assign(i18n.zh.vehicle, {
+  extras: '可选服务',
+  qty: '数量',
+  daily: '按日收费',
+  mandatoryFee: '必选费用',
+  youngDriverFee: 'Young Driver Fee'
+});
 
 vehicleText.en = {
   'budget-vitz': {
@@ -550,8 +572,133 @@ function normalizeSearchDates(search) {
   return {
     ...search,
     pickupDate: toIsoDate(search.pickupDate),
-    returnDate: toIsoDate(search.returnDate)
+    returnDate: toIsoDate(search.returnDate),
+    driverAge: String(search.driverAge || '').trim(),
+    promoCode: String(search.promoCode || '').trim()
   };
+}
+
+function searchDays(search = currentSearch) {
+  const pickup = new Date(`${search.pickupDate}T${search.pickupTime || '09:30'}`);
+  const dropoff = new Date(`${search.returnDate}T${search.returnTime || '09:30'}`);
+  return Math.max(1, Math.ceil((dropoff - pickup) / 86400000));
+}
+
+function showSearchError(key) {
+  if (statusBox) {
+    setStatusKey(key, 'error');
+    return;
+  }
+  alert(tr().status[key]);
+}
+
+function calculateSelectedVehicle() {
+  if (!selectedVehicle) return null;
+  const days = Number(selectedVehicle.days || searchDays());
+  const driverAge = Number(currentSearch.driverAge || 25);
+  const requiredYoungDriverFee = driverAge >= 21 && driverAge <= 25 ? 20 * days : 0;
+  const hasYoungDriverFee = selectedVehicle.youngDriverFee !== undefined && selectedVehicle.youngDriverFee !== null;
+  const youngDriverFee = hasYoungDriverFee ? Number(selectedVehicle.youngDriverFee || 0) : requiredYoungDriverFee;
+  const mandatoryAdjustment = hasYoungDriverFee ? 0 : youngDriverFee;
+  const selectedExtras = [];
+  let extrasTotal = 0;
+
+  extrasPanel?.querySelectorAll('[data-extra]').forEach((row) => {
+    const checkbox = row.querySelector('input[type="checkbox"]');
+    const qtyInput = row.querySelector('input[type="number"]');
+    const extra = optionalExtras.find((item) => item.id === row.dataset.extra);
+    if (!extra || !checkbox?.checked) return;
+
+    const qty = Math.max(1, Number(qtyInput?.value || extra.defaultQty || 1));
+    const total = extra.dailyRate * qty * days;
+    extrasTotal += total;
+    selectedExtras.push({
+      id: extra.id,
+      name: extra.name,
+      dailyRate: extra.dailyRate,
+      qty,
+      days,
+      total
+    });
+  });
+
+  const baseTotal = Number(selectedVehicle.total || 0);
+  const total = baseTotal + mandatoryAdjustment + extrasTotal;
+  const deposit = Math.round(total * depositPercent / 100);
+  return {
+    ...selectedVehicle,
+    youngDriverFee,
+    total,
+    deposit,
+    optionalExtras: selectedExtras,
+    optionalExtrasTotal: extrasTotal
+  };
+}
+
+function renderSelectedSummary() {
+  if (!selectedVehicle || !selectedSummary) return;
+  pricedVehicle = calculateSelectedVehicle();
+  const vehicle = localizeVehicle(pricedVehicle);
+  const t = tr();
+  const youngDriverLine = pricedVehicle.youngDriverFee
+    ? `<br>${t.vehicle.mandatoryFee}: ${t.vehicle.youngDriverFee} ${money.format(pricedVehicle.youngDriverFee)}`
+    : '';
+
+  selectedSummary.innerHTML = [
+    `<strong>${vehicle.name}</strong>`,
+    `${currentSearch.pickupLocation} ${t.vehicle.connector} ${currentSearch.returnLocation}`,
+    `${formatSearchDate(currentSearch.pickupDate)} ${currentSearch.pickupTime || ''} - ${formatSearchDate(currentSearch.returnDate)} ${currentSearch.returnTime || ''}`,
+    `${t.vehicle.total} ${money.format(pricedVehicle.total)} / ${t.vehicle.deposit} ${money.format(pricedVehicle.deposit)}${youngDriverLine}`
+  ].join('<br>');
+}
+
+function renderExtrasPanel() {
+  if (!extrasPanel || !selectedVehicle) return;
+  const t = tr();
+  const days = Number(selectedVehicle.days || searchDays());
+  extrasPanel.innerHTML = `
+    <div class="extras-heading">
+      <strong>${t.vehicle.extras}</strong>
+      <span>${days} ${t.vehicle.daysTotal}</span>
+    </div>
+    <div class="extras-table">
+      <div class="extras-row extras-header">
+        <span>Name</span>
+        <span>Select</span>
+        <span>${t.vehicle.qty}</span>
+        <span>${t.vehicle.daily}</span>
+        <span>Total</span>
+      </div>
+      ${optionalExtras.map((extra) => `
+        <div class="extras-row" data-extra="${extra.id}">
+          <span>${currentLang === 'zh' ? extra.zhName : extra.name}</span>
+          <input type="checkbox" aria-label="${extra.name}">
+          <input type="number" min="1" max="4" value="${extra.defaultQty}">
+          <span>${money.format(extra.dailyRate)}</span>
+          <strong data-extra-total>${money.format(0)}</strong>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  extrasPanel.oninput = updateExtrasTotals;
+  extrasPanel.onchange = updateExtrasTotals;
+  updateExtrasTotals();
+}
+
+function updateExtrasTotals() {
+  if (!extrasPanel || !selectedVehicle) return;
+  const days = Number(selectedVehicle.days || searchDays());
+  extrasPanel.querySelectorAll('[data-extra]').forEach((row) => {
+    const checkbox = row.querySelector('input[type="checkbox"]');
+    const qtyInput = row.querySelector('input[type="number"]');
+    const totalNode = row.querySelector('[data-extra-total]');
+    const extra = optionalExtras.find((item) => item.id === row.dataset.extra);
+    const qty = Math.max(1, Number(qtyInput?.value || 1));
+    const total = checkbox?.checked && extra ? extra.dailyRate * qty * days : 0;
+    if (totalNode) totalNode.textContent = money.format(total);
+  });
+  renderSelectedSummary();
 }
 
 function setDefaultDates() {
@@ -570,7 +717,7 @@ function setDefaultDates() {
 function applySearchParams() {
   if (!form) return;
   const params = new URLSearchParams(location.search);
-  ['pickupLocation', 'returnLocation', 'pickupDate', 'pickupTime', 'returnDate', 'returnTime'].forEach((key) => {
+  ['pickupLocation', 'returnLocation', 'pickupDate', 'pickupTime', 'returnDate', 'returnTime', 'driverAge', 'promoCode'].forEach((key) => {
     const value = params.get(key);
     if (value && form.elements[key]) {
       form.elements[key].value = key.endsWith('Date') ? toDateDisplay(value) : value;
@@ -774,7 +921,12 @@ if (form) {
     currentSearch = normalizeSearchDates(formDataToObject(form));
 
     if (!currentSearch.pickupDate || !currentSearch.returnDate) {
-      setStatusKey('dateError', 'error');
+      showSearchError('dateError');
+      return;
+    }
+
+    if (Number(currentSearch.driverAge) < 21) {
+      showSearchError('ageError');
       return;
     }
 
@@ -787,7 +939,7 @@ if (form) {
     const pickupDateTime = new Date(`${currentSearch.pickupDate}T${currentSearch.pickupTime || '00:00'}`);
     const returnDateTime = new Date(`${currentSearch.returnDate}T${currentSearch.returnTime || '00:00'}`);
     if (returnDateTime <= pickupDateTime) {
-      setStatusKey('dateError', 'error');
+      showSearchError('dateError');
       return;
     }
 
@@ -811,15 +963,9 @@ if (fleetGrid) fleetGrid.addEventListener('click', (event) => {
   const vehicleCards = [...fleetGrid.querySelectorAll('[data-book]')];
   const index = vehicleCards.indexOf(button);
   selectedVehicle = window.latestVehicles?.[index];
-  const vehicle = localizeVehicle(selectedVehicle);
-  const t = tr();
-
-  selectedSummary.innerHTML = [
-    `<strong>${vehicle.name}</strong>`,
-    `${currentSearch.pickupLocation} ${t.vehicle.connector} ${currentSearch.returnLocation}`,
-    `${formatSearchDate(currentSearch.pickupDate)} ${currentSearch.pickupTime || ''} - ${formatSearchDate(currentSearch.returnDate)} ${currentSearch.returnTime || ''}`,
-    `${t.vehicle.total} ${money.format(vehicle.total)} / ${t.vehicle.deposit} ${money.format(vehicle.deposit)}`
-  ].join('<br>');
+  pricedVehicle = selectedVehicle;
+  renderExtrasPanel();
+  renderSelectedSummary();
   dialog.showModal();
 });
 
@@ -833,18 +979,19 @@ if (customerForm) customerForm.addEventListener('submit', async (event) => {
   submitButton.textContent = tr().buttons.creating;
 
   try {
+    pricedVehicle = calculateSelectedVehicle();
     const booking = await postJson('/api/bookings', {
       search: currentSearch,
-      vehicle: selectedVehicle,
+      vehicle: pricedVehicle,
       customer
     });
 
     submitButton.textContent = tr().buttons.opening;
     const payment = await postJson('/api/pay-deposit', {
       bookingId: booking.bookingId,
-      vehicleName: selectedVehicle.name,
-      total: selectedVehicle.total,
-      deposit: selectedVehicle.deposit,
+      vehicleName: pricedVehicle.name,
+      total: pricedVehicle.total,
+      deposit: pricedVehicle.deposit,
       customerEmail: customer.email
     });
 

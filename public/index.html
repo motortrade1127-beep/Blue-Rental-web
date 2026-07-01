@@ -71,6 +71,16 @@
             <small class="field-hint">NZ local time</small>
             <select name="returnTime" data-time-select data-default-time="09:30" required></select>
           </label>
+          <label>
+            Driver age
+            <small class="field-hint">21+ only. 21-25 adds NZ$20/day young driver fee.</small>
+            <input name="driverAge" type="number" min="18" max="99" value="25" required>
+          </label>
+          <label>
+            Promo code
+            <small class="field-hint">Optional</small>
+            <input name="promoCode" type="text" placeholder="Optional">
+          </label>
           <button class="button primary" type="submit">Search Vehicles</button>
         </form>
       </section>

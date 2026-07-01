@@ -115,6 +115,9 @@ function bookingText(booking) {
     const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return match ? `${match[3]}/${match[2]}/${match[1]}` : value || '';
   };
+  const extras = vehicle.optionalExtras?.length
+    ? vehicle.optionalExtras.map((item) => `${item.name} x${item.qty}: NZD ${item.total}`).join('; ')
+    : 'None';
 
   return [
     `Booking reference: ${booking.bookingId}`,
@@ -125,6 +128,10 @@ function bookingText(booking) {
     `Vehicle: ${vehicle.name || 'Vehicle pending'}`,
     `Dates: ${formatDate(search.pickupDate)} ${search.pickupTime || ''} - ${formatDate(search.returnDate)} ${search.returnTime || ''}`,
     `Route: ${search.pickupLocation || ''} to ${search.returnLocation || ''}`,
+    `Driver age: ${search.driverAge || ''}`,
+    `Promo code: ${search.promoCode || 'None'}`,
+    `Mandatory fees: ${vehicle.youngDriverFee ? `Young Driver Fee NZD ${vehicle.youngDriverFee}` : 'None'}`,
+    `Optional extras: ${extras}`,
     `Customer: ${customer.name || ''}`,
     `Email: ${customer.email || ''}`,
     `Phone: ${customer.phone || ''}`,
@@ -336,13 +343,18 @@ async function callRcm(path, body) {
 
 function quoteVehicle(vehicle, search) {
   const days = rentalDays(search);
+  const driverAge = Number(search.driverAge || 25);
+  if (driverAge < 21) {
+    throw new Error('Drivers under 21 cannot rent a vehicle from Blue Rental.');
+  }
   const subtotal = vehicle.dailyRate * days;
+  const youngDriverFee = driverAge >= 21 && driverAge <= 25 ? 20 * days : 0;
   const fees = Math.round(subtotal * 0.08);
-  const total = subtotal + fees;
+  const total = subtotal + fees + youngDriverFee;
   const depositPercent = Number(process.env.DEPOSIT_PERCENT || 10);
   const deposit = Math.round(total * depositPercent / 100);
 
-  return { ...vehicle, days, subtotal, fees, total, deposit };
+  return { ...vehicle, days, subtotal, fees, youngDriverFee, total, deposit };
 }
 
 function xmlEscape(value = '') {
