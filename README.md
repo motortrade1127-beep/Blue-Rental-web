@@ -6,6 +6,7 @@ Blue Rental booking website prototype with:
 - Express backend for keeping RCM and payment credentials server-side
 - Demo inventory mode for previewing without live RCM credentials
 - Windcave PxPay hosted payment page for online deposit collection
+- OpenAI-backed website chat assistant with FAQ fallback
 - Rental Car Manager adapter points in `server.mjs`
 
 ## Run locally
@@ -80,6 +81,21 @@ SMTP_FROM=Blue Rental <info@bluerental.co.nz>
 
 If SMTP is not configured, bookings and payment status are still recorded, but no email is sent.
 
+## AI chat assistant
+
+The site includes a chat widget on customer-facing pages.
+
+For true AI answers, set:
+
+```text
+OPENAI_API_KEY=your_openai_api_key
+AI_ASSISTANT_MODEL=gpt-4.1-mini
+```
+
+If `OPENAI_API_KEY` is not configured, the assistant falls back to a safe built-in FAQ mode.
+
+The assistant is constrained to Blue Rental knowledge and should not promise live availability, final prices, refunds, policy exceptions, or booking-specific status.
+
 ## Rental Car Manager
 
 Set RCM sandbox/live details and disable demo data:
@@ -121,6 +137,8 @@ DEPOSIT_PERCENT=10
 PAYMENT_CURRENCY=NZD
 ADMIN_TOKEN=choose_a_private_password
 BUSINESS_NOTIFICATION_EMAIL=info@bluerental.co.nz
+OPENAI_API_KEY=your_openai_api_key
+AI_ASSISTANT_MODEL=gpt-4.1-mini
 RCM_USE_DEMO_DATA=true
 SITE_URL=https://your-render-service.onrender.com
 ```

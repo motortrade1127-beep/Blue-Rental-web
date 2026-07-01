@@ -1,18 +1,18 @@
 const chatLabels = {
   en: {
-    title: 'Blue Rental Assistant',
-    intro: 'Hi, I can help with vehicles, insurance, deposits and pick-up information.',
-    placeholder: 'Ask a question...',
+    title: 'Blue Rental AI',
+    intro: 'Hi, I can help with vehicles, insurance, deposits, pick-up details and general rental questions.',
+    placeholder: 'Ask me anything...',
     send: 'Send',
-    open: 'Chat',
+    open: 'AI Chat',
     fallback: 'Sorry, I could not answer that just now. Please contact Blue Rental directly.'
   },
   zh: {
-    title: 'Blue Rental 助手',
-    intro: '你好，我可以回答车型、保险、定金、取还车等常见问题。',
-    placeholder: '请输入问题...',
+    title: 'Blue Rental AI 助手',
+    intro: '你好，我可以回答车型、保险、定金、取还车和一般租车问题。',
+    placeholder: '请输入你的问题...',
     send: '发送',
-    open: '客服',
+    open: 'AI 客服',
     fallback: '抱歉，我暂时无法回答这个问题。请直接联系 Blue Rental。'
   }
 };
@@ -47,14 +47,14 @@ function initChatAssistant() {
   root.className = 'chat-assistant';
   root.innerHTML = `
     <button class="chat-toggle" type="button" aria-label="${labels.open}">
-      <span>?</span>
+      <span>AI</span>
       <strong>${labels.open}</strong>
     </button>
     <section class="chat-panel" aria-label="${labels.title}">
       <header>
         <div>
           <strong>${labels.title}</strong>
-          <small>Online</small>
+          <small>Online assistant</small>
         </div>
         <button type="button" class="chat-close" aria-label="Close">x</button>
       </header>
@@ -96,7 +96,7 @@ function initChatAssistant() {
     messages.appendChild(createMessage(text, 'user'));
     messages.scrollTop = messages.scrollHeight;
 
-    const loading = createMessage('...', 'assistant');
+    const loading = createMessage(chatLanguage() === 'zh' ? '正在思考...' : 'Thinking...', 'assistant');
     messages.appendChild(loading);
 
     try {

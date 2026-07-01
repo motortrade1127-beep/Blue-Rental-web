@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import nodemailer from 'nodemailer';
+import OpenAI from 'openai';
 import express from 'express';
 
 const app = express();
@@ -18,6 +19,9 @@ const dataDir = path.join(process.cwd(), 'data');
 const bookingsFile = path.join(dataDir, 'bookings.json');
 const adminToken = process.env.ADMIN_TOKEN || '';
 const businessEmail = process.env.BUSINESS_NOTIFICATION_EMAIL || '';
+const openaiApiKey = process.env.OPENAI_API_KEY || '';
+const aiAssistantModel = process.env.AI_ASSISTANT_MODEL || 'gpt-4.1-mini';
+const openai = openaiApiKey && !openaiApiKey.includes('replace_me') ? new OpenAI({ apiKey: openaiApiKey }) : null;
 
 const smtpConfigured = Boolean(
   process.env.SMTP_HOST &&
@@ -635,6 +639,29 @@ const assistantTopics = [
   }
 ];
 
+const assistantKnowledge = `
+Blue Rental business information:
+- Blue Rental is a Christchurch, New Zealand car rental company.
+- Main branch: 249 Main South Rd, Hornby, Christchurch 8042, New Zealand.
+- Christchurch Airport bookings can use a free shuttle between the airport and the Hornby branch.
+- Queenstown Airport service is coming soon.
+- Opening hours: 9.30am to 5pm. Public holiday surcharge may apply.
+- Phone: 03 281 8858.
+- Email: info@bluerental.co.nz.
+- Online bookings may enjoy up to 25% off. T&C apply.
+- Vehicle categories: Super Eco, Eco Model, Compact, Intermediate, Wagon, Middle Size Sedan, 7 Seater, SUV, Luxury SUV.
+- Example vehicles include Toyota Vitz, Toyota Spade, Toyota Aqua, Toyota Corolla Hatch, Corolla Fielder, Toyota Camry, Toyota Vellfire, Mazda CX-5 and Audi Q7 or similar.
+- Online deposit: customers can pay 10% deposit through Windcave PxPay. The remaining balance can be paid at pick-up unless Blue Rental confirms otherwise.
+- Insurance options:
+  Standard Cover: NZ$0/day, collision damage excess NZ$4,000, bond NZ$2,000, roadside assistance not included, windshield chip cover not included, tyre cover not included, third-party liability excess NZ$4,000.
+  Smart Cover: NZ$20/day, collision damage excess NZ$2,000, bond NZ$1,000, roadside assistance included, windshield chip cover included, tyre cover not included, third-party liability excess NZ$4,000.
+  Elite Cover: NZ$40/day, collision damage excess NZ$500, bond NZ$500, roadside assistance included, windshield chip cover included, tyre cover included.
+- International drivers: Elite Cover may cost 1.5 times the standard rate due to higher risk.
+- Exclusions: negligence, intentional actions, breach of rental agreement and unlawful driving are not covered.
+- Customers should bring a valid driver licence and any required translation or international driving permit.
+- For real-time availability, final prices, booking-specific questions, refunds, cancellations or final insurance eligibility, ask the customer to contact Blue Rental or use the booking form.
+`;
+
 function assistantReply(message = '', language = '') {
   const text = String(message).toLowerCase();
   const wantsChinese = language === 'zh' || /[\u3400-\u9fff]/.test(message);
@@ -647,10 +674,54 @@ function assistantReply(message = '', language = '') {
     : 'I can help with Blue Rental pick-up, airport shuttle, vehicles, insurance, deposit payment and opening-hours questions. For booking-specific details or live availability, please contact 03 281 8858 or info@bluerental.co.nz.';
 }
 
-app.post('/api/chat', (req, res) => {
+async function aiAssistantReply(message = '', language = '') {
+  if (!openai) return assistantReply(message, language);
+
+  const wantsChinese = language === 'zh' || /[\u3400-\u9fff]/.test(message);
+  const outputLanguage = wantsChinese ? 'Chinese' : 'English';
+  const fallback = assistantReply(message, language);
+
+  const response = await openai.responses.create({
+    model: aiAssistantModel,
+    input: [
+      {
+        role: 'system',
+        content: [
+          `You are Blue Rental Assistant, a helpful website chat assistant for a New Zealand car rental company.`,
+          `Answer in ${outputLanguage}. Be friendly, concise, and practical.`,
+          `Use only the business information below. Do not invent live availability, final prices, refunds, policy exceptions, or booking status.`,
+          `If the question requires a booking-specific answer, live inventory, final eligibility, or anything not in the knowledge base, say that Blue Rental should confirm it and provide phone/email.`,
+          `Never ask for full credit card details or sensitive passwords in chat.`,
+          assistantKnowledge,
+          `If the user's question is unrelated to car rental or Blue Rental, politely redirect them to Blue Rental rental questions.`
+        ].join('\n')
+      },
+      {
+        role: 'user',
+        content: String(message).slice(0, 1000)
+      }
+    ],
+    max_output_tokens: 260
+  });
+
+  return response.output_text?.trim() || fallback;
+}
+
+app.post('/api/chat', async (req, res) => {
   const message = req.body?.message || '';
   const language = req.body?.language || '';
-  res.json({ reply: assistantReply(message, language) });
+  try {
+    res.json({
+      mode: openai ? 'ai' : 'faq',
+      reply: await aiAssistantReply(message, language)
+    });
+  } catch (error) {
+    console.error('AI assistant failed:', error.message);
+    res.json({
+      mode: 'faq',
+      reply: assistantReply(message, language)
+    });
+  }
 });
 
 app.listen(port, () => {
