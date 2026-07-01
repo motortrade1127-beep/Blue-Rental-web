@@ -291,8 +291,10 @@ const demoFleet = [
   }
 ];
 
-function daysBetween(start, end) {
-  const ms = new Date(end) - new Date(start);
+function rentalDays(search = {}) {
+  const pickup = new Date(`${search.pickupDate}T${search.pickupTime || '09:30'}`);
+  const dropoff = new Date(`${search.returnDate}T${search.returnTime || '09:30'}`);
+  const ms = dropoff - pickup;
   return Math.max(1, Math.ceil(ms / 86400000));
 }
 
@@ -329,7 +331,7 @@ async function callRcm(path, body) {
 }
 
 function quoteVehicle(vehicle, search) {
-  const days = daysBetween(search.pickupDate, search.returnDate);
+  const days = rentalDays(search);
   const subtotal = vehicle.dailyRate * days;
   const fees = Math.round(subtotal * 0.08);
   const total = subtotal + fees;
