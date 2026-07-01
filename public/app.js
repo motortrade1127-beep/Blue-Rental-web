@@ -4,6 +4,7 @@ const statusBox = document.getElementById('status');
 const dialog = document.getElementById('customerDialog');
 const customerForm = document.getElementById('customerForm');
 const selectedSummary = document.getElementById('selectedSummary');
+const insurancePanel = document.getElementById('insurancePanel');
 const extrasPanel = document.getElementById('extrasPanel');
 const closeButton = document.querySelector('.icon-close');
 
@@ -23,6 +24,11 @@ const optionalExtras = [
   { id: 'babySeat', name: 'Baby Seat', zhName: '婴儿座椅', dailyRate: 10, defaultQty: 1 },
   { id: 'roadside', name: 'Premium Road Side Assistance Package', zhName: '高级道路救援服务包', dailyRate: 3, defaultQty: 1 },
   { id: 'snowChain', name: 'Snow Chain', zhName: '雪链', dailyRate: 15, defaultQty: 1 }
+];
+const insuranceOptions = [
+  { id: 'standard', name: 'Standard Cover', zhName: '标准保险', dailyRate: 0, excess: 'NZ$4,000', bond: 'NZ$2,000' },
+  { id: 'smart', name: 'Smart Cover', zhName: 'Smart Cover', dailyRate: 20, excess: 'NZ$2,000', bond: 'NZ$1,000' },
+  { id: 'elite', name: 'Elite Cover', zhName: 'Elite Cover', dailyRate: 40, excess: 'NZ$500', bond: 'NZ$500' }
 ];
 
 const i18n = {
@@ -117,8 +123,8 @@ const i18n = {
     dialog: {
       eyebrow: 'Secure Booking',
       title: 'Confirm booking and pay 10% deposit',
-      labels: ['Name', 'Email', 'Phone', 'Promo code'],
-      placeholders: ['Full name', 'name@example.com', '+64', 'Optional'],
+      labels: ['Name', 'Email', 'Phone', 'Flight number', 'Promo code'],
+      placeholders: ['Full name', 'name@example.com', '+64', 'Optional, e.g. NZ533', 'Optional'],
       ageConsent: "I'm over 21 years old",
       ageNotice: 'Sorry, due to our insurance policy, Blue Rental is currently unable to rent vehicles to customers under 21.',
       finePrint: 'Payments are handled by Windcave PxPay. In demo mode, this redirects to a simulated success page.'
@@ -145,6 +151,9 @@ const i18n = {
       total: 'Total',
       deposit: 'Deposit',
       extras: 'Optional extras',
+      insurance: 'Insurance options',
+      excess: 'Excess',
+      bond: 'Bond',
       qty: 'Qty',
       daily: 'Daily',
       connector: 'to',
@@ -419,12 +428,15 @@ i18n.zh.process = {
 };
 i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间'];
 i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间'];
-i18n.zh.dialog.labels = ['姓名', '邮箱', '电话', '优惠码'];
-i18n.zh.dialog.placeholders = ['姓名', 'name@example.com', '+64', '选填'];
+i18n.zh.dialog.labels = ['姓名', '邮箱', '电话', '航班号', '优惠码'];
+i18n.zh.dialog.placeholders = ['姓名', 'name@example.com', '+64', '选填，例如 NZ533', '选填'];
 i18n.zh.dialog.ageConsent = '我已年满 21 岁';
 i18n.zh.dialog.ageNotice = '抱歉，由于保险政策要求，我们暂时不对 21 岁以下的客人开放租车服务。';
 Object.assign(i18n.zh.vehicle, {
   extras: '可选服务',
+  insurance: '保险选项',
+  excess: '垫底费',
+  bond: '预授权/押金',
   qty: '数量',
   daily: '按日收费'
 });
@@ -593,6 +605,9 @@ function showSearchError(key) {
 function calculateSelectedVehicle() {
   if (!selectedVehicle) return null;
   const days = Number(selectedVehicle.days || searchDays());
+  const selectedInsuranceId = insurancePanel?.querySelector('input[name="insuranceOption"]:checked')?.value || 'standard';
+  const selectedInsurance = insuranceOptions.find((item) => item.id === selectedInsuranceId) || insuranceOptions[0];
+  const insuranceTotal = selectedInsurance.dailyRate * days;
   const selectedExtras = [];
   let extrasTotal = 0;
 
@@ -616,12 +631,21 @@ function calculateSelectedVehicle() {
   });
 
   const baseTotal = Number(selectedVehicle.total || 0);
-  const total = baseTotal + extrasTotal;
+  const total = baseTotal + insuranceTotal + extrasTotal;
   const deposit = Math.round(total * depositPercent / 100);
   return {
     ...selectedVehicle,
     total,
     deposit,
+    insurance: {
+      id: selectedInsurance.id,
+      name: selectedInsurance.name,
+      dailyRate: selectedInsurance.dailyRate,
+      days,
+      total: insuranceTotal,
+      excess: selectedInsurance.excess,
+      bond: selectedInsurance.bond
+    },
     optionalExtras: selectedExtras,
     optionalExtrasTotal: extrasTotal
   };
@@ -673,6 +697,31 @@ function renderExtrasPanel() {
   extrasPanel.oninput = updateExtrasTotals;
   extrasPanel.onchange = updateExtrasTotals;
   updateExtrasTotals();
+}
+
+function renderInsurancePanel() {
+  if (!insurancePanel || !selectedVehicle) return;
+  const t = tr();
+  const days = Number(selectedVehicle.days || searchDays());
+  insurancePanel.innerHTML = `
+    <div class="extras-heading">
+      <strong>${t.vehicle.insurance}</strong>
+      <span>${days} ${t.vehicle.daysTotal}</span>
+    </div>
+    <div class="insurance-options">
+      ${insuranceOptions.map((option) => `
+        <label class="insurance-option">
+          <input type="radio" name="insuranceOption" value="${option.id}" ${option.id === 'standard' ? 'checked' : ''}>
+          <span>
+            <strong>${currentLang === 'zh' ? option.zhName : option.name}</strong>
+            <small>${money.format(option.dailyRate)}/${t.vehicle.perDay} · ${t.vehicle.excess}: ${option.excess} · ${t.vehicle.bond}: ${option.bond}</small>
+          </span>
+          <b>${money.format(option.dailyRate * days)}</b>
+        </label>
+      `).join('')}
+    </div>
+  `;
+  insurancePanel.onchange = renderSelectedSummary;
 }
 
 function updateExtrasTotals() {
@@ -842,7 +891,7 @@ function applyLanguage() {
 
   setText('#customerDialog .eyebrow', t.dialog.eyebrow);
   setText('#customerDialog h2', t.dialog.title);
-  document.querySelectorAll('#customerDialog label:not(.age-confirm)').forEach((label, index) => {
+  document.querySelectorAll('#customerDialog .customer-form > label:not(.age-confirm)').forEach((label, index) => {
     setLabelText(label, t.dialog.labels[index]);
     label.querySelector('input').placeholder = t.dialog.placeholders[index];
   });
@@ -950,6 +999,7 @@ if (fleetGrid) fleetGrid.addEventListener('click', (event) => {
   const index = vehicleCards.indexOf(button);
   selectedVehicle = window.latestVehicles?.[index];
   pricedVehicle = selectedVehicle;
+  renderInsurancePanel();
   renderExtrasPanel();
   renderSelectedSummary();
   const ageNotice = document.getElementById('ageNotice');

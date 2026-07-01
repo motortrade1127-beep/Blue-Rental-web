@@ -797,6 +797,11 @@ dialog::backdrop {
   gap: 10px;
 }
 
+.insurance-choice {
+  display: grid;
+  gap: 10px;
+}
+
 .extras-heading {
   display: flex;
   align-items: end;
@@ -850,6 +855,43 @@ dialog::backdrop {
 }
 
 .extras-row strong {
+  color: var(--ink);
+}
+
+.insurance-options {
+  display: grid;
+  gap: 10px;
+}
+
+.insurance-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.insurance-option input {
+  width: 20px;
+  min-height: 20px;
+}
+
+.insurance-option span {
+  display: grid;
+  gap: 4px;
+}
+
+.insurance-option small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.insurance-option b {
   color: var(--ink);
 }
 

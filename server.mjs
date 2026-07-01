@@ -118,6 +118,9 @@ function bookingText(booking) {
   const extras = vehicle.optionalExtras?.length
     ? vehicle.optionalExtras.map((item) => `${item.name} x${item.qty}: NZD ${item.total}`).join('; ')
     : 'None';
+  const insurance = vehicle.insurance
+    ? `${vehicle.insurance.name}: NZD ${vehicle.insurance.total}, excess ${vehicle.insurance.excess}, bond ${vehicle.insurance.bond}`
+    : 'Not selected';
 
   return [
     `Booking reference: ${booking.bookingId}`,
@@ -130,10 +133,12 @@ function bookingText(booking) {
     `Route: ${search.pickupLocation || ''} to ${search.returnLocation || ''}`,
     `Over 21 confirmed: ${customer.over21Consent === 'yes' ? 'Yes' : 'No'}`,
     `Promo code: ${customer.promoCode || 'None'}`,
+    `Insurance: ${insurance}`,
     `Optional extras: ${extras}`,
     `Customer: ${customer.name || ''}`,
     `Email: ${customer.email || ''}`,
     `Phone: ${customer.phone || ''}`,
+    `Flight number: ${customer.flightNumber || 'None'}`,
     `Windcave Txn: ${payment.dpsTxnRef || payment.txnId || ''}`
   ].join('\n');
 }
