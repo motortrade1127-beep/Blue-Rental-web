@@ -55,6 +55,11 @@
         return new Date(value).toLocaleString('en-NZ', { dateStyle: 'medium', timeStyle: 'short' });
       }
 
+      function formatRentalDate(value) {
+        const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        return match ? `${match[3]}/${match[2]}/${match[1]}` : value || '';
+      }
+
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const token = new FormData(form).get('token');
@@ -85,7 +90,7 @@
                   <dt>Email</dt><dd>${customer.email || 'Not recorded'}</dd>
                   <dt>Phone</dt><dd>${customer.phone || 'Not recorded'}</dd>
                   <dt>Vehicle</dt><dd>${vehicle.name || payment.vehicleName || 'Not recorded'}</dd>
-                  <dt>Dates</dt><dd>${search.pickupDate || ''} ${search.pickupTime || ''} - ${search.returnDate || ''} ${search.returnTime || ''}</dd>
+                  <dt>Dates</dt><dd>${formatRentalDate(search.pickupDate)} ${search.pickupTime || ''} - ${formatRentalDate(search.returnDate)} ${search.returnTime || ''}</dd>
                   <dt>Deposit</dt><dd>${money(payment.deposit)}</dd>
                   <dt>Paid at</dt><dd>${formatDate(payment.paidAt)}</dd>
                   <dt>Windcave ref</dt><dd>${payment.dpsTxnRef || payment.txnId || 'Not recorded'}</dd>

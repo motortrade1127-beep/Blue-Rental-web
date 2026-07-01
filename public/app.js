@@ -507,6 +507,51 @@ function populateTimeSelects() {
   });
 }
 
+function toDateDisplay(value) {
+  const isoMatch = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+  const displayMatch = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return displayMatch ? value : '';
+}
+
+function toIsoDate(value) {
+  const isoMatch = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) return isValidIsoDate(value) ? value : '';
+  const displayMatch = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!displayMatch) return '';
+  const isoValue = `${displayMatch[3]}-${displayMatch[2]}-${displayMatch[1]}`;
+  return isValidIsoDate(isoValue) ? isoValue : '';
+}
+
+function isValidIsoDate(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
+function formatSearchDate(value) {
+  return toDateDisplay(value) || value || '';
+}
+
+function toLocalIsoDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeSearchDates(search) {
+  return {
+    ...search,
+    pickupDate: toIsoDate(search.pickupDate),
+    returnDate: toIsoDate(search.returnDate)
+  };
+}
+
 function setDefaultDates() {
   if (!form) return;
   const today = new Date();
@@ -514,8 +559,8 @@ function setDefaultDates() {
   pickup.setDate(today.getDate() + 2);
   const dropoff = new Date(today);
   dropoff.setDate(today.getDate() + 6);
-  form.elements.pickupDate.value = pickup.toISOString().slice(0, 10);
-  form.elements.returnDate.value = dropoff.toISOString().slice(0, 10);
+  form.elements.pickupDate.value = toDateDisplay(toLocalIsoDate(pickup));
+  form.elements.returnDate.value = toDateDisplay(toLocalIsoDate(dropoff));
   if (form.elements.pickupTime && !form.elements.pickupTime.value) form.elements.pickupTime.value = '09:30';
   if (form.elements.returnTime && !form.elements.returnTime.value) form.elements.returnTime.value = '09:30';
 }
@@ -525,7 +570,9 @@ function applySearchParams() {
   const params = new URLSearchParams(location.search);
   ['pickupLocation', 'returnLocation', 'pickupDate', 'pickupTime', 'returnDate', 'returnTime'].forEach((key) => {
     const value = params.get(key);
-    if (value && form.elements[key]) form.elements[key].value = value;
+    if (value && form.elements[key]) {
+      form.elements[key].value = key.endsWith('Date') ? toDateDisplay(value) : value;
+    }
   });
 }
 
@@ -720,7 +767,12 @@ async function postJson(url, data) {
 if (form) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    currentSearch = formDataToObject(form);
+    currentSearch = normalizeSearchDates(formDataToObject(form));
+
+    if (!currentSearch.pickupDate || !currentSearch.returnDate) {
+      setStatusKey('dateError', 'error');
+      return;
+    }
 
     if (!fleetGrid || !statusBox) {
       const params = new URLSearchParams(currentSearch);
@@ -761,7 +813,7 @@ if (fleetGrid) fleetGrid.addEventListener('click', (event) => {
   selectedSummary.innerHTML = [
     `<strong>${vehicle.name}</strong>`,
     `${currentSearch.pickupLocation} ${t.vehicle.connector} ${currentSearch.returnLocation}`,
-    `${currentSearch.pickupDate} ${currentSearch.pickupTime || ''} - ${currentSearch.returnDate} ${currentSearch.returnTime || ''}`,
+    `${formatSearchDate(currentSearch.pickupDate)} ${currentSearch.pickupTime || ''} - ${formatSearchDate(currentSearch.returnDate)} ${currentSearch.returnTime || ''}`,
     `${t.vehicle.total} ${money.format(vehicle.total)} / ${t.vehicle.deposit} ${money.format(vehicle.deposit)}`
   ].join('<br>');
   dialog.showModal();

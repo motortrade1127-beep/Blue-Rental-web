@@ -111,6 +111,10 @@ function bookingText(booking) {
   const search = booking.search || {};
   const vehicle = booking.vehicle || {};
   const payment = booking.payment || {};
+  const formatDate = (value) => {
+    const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : value || '';
+  };
 
   return [
     `Booking reference: ${booking.bookingId}`,
@@ -119,7 +123,7 @@ function bookingText(booking) {
     `Deposit paid: ${payment.deposit ? `NZD ${payment.deposit}` : 'Pending'}`,
     `Total: ${vehicle.total ? `NZD ${vehicle.total}` : 'Pending'}`,
     `Vehicle: ${vehicle.name || 'Vehicle pending'}`,
-    `Dates: ${search.pickupDate || ''} ${search.pickupTime || ''} - ${search.returnDate || ''} ${search.returnTime || ''}`,
+    `Dates: ${formatDate(search.pickupDate)} ${search.pickupTime || ''} - ${formatDate(search.returnDate)} ${search.returnTime || ''}`,
     `Route: ${search.pickupLocation || ''} to ${search.returnLocation || ''}`,
     `Customer: ${customer.name || ''}`,
     `Email: ${customer.email || ''}`,
