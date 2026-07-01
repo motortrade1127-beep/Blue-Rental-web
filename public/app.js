@@ -21,12 +21,12 @@ const money = new Intl.NumberFormat('en-NZ', {
 });
 const depositPercent = 10;
 const optionalExtras = [
-  { id: 'babySeat', name: 'Baby Seat', zhName: '婴儿座椅', dailyRate: 10, defaultQty: 1, maxTotal: 100 },
   { id: 'roadside', name: 'Premium Road Side Assistance Package', zhName: '高级道路救援服务包', dailyRate: 3, defaultQty: 1 },
-  { id: 'snowChain', name: 'Snow Chain', zhName: '雪链', dailyRate: 15, defaultQty: 1, maxTotal: 100 },
-  { id: 'youngDriverFee', name: 'Young Driver Fee (21-24 years old)', zhName: '年轻驾驶员附加费（21-24岁）', dailyRate: 25, defaultQty: 1 },
-  { id: 'iceBucket', name: 'Ice Bucket', zhName: '冰桶', dailyRate: 10, defaultQty: 1, maxTotal: 50 },
-  { id: 'glassInsurance', name: 'Glass insurance', zhName: '玻璃保险', dailyRate: 8, defaultQty: 1 }
+  { id: 'glassInsurance', name: 'Glass insurance', zhName: '玻璃保险', dailyRate: 8, defaultQty: 1 },
+  { id: 'babySeat', name: 'Baby Seat', zhName: '婴儿座椅', dailyRate: 10, defaultQty: 1, maxTotal: 100 },
+  { id: 'iceBucket', name: 'Ice Bucket', zhName: '冷藏箱', dailyRate: 10, defaultQty: 1, maxTotal: 50 },
+  { id: 'snowChain', name: 'Snow Chain', zhName: '防滑链', dailyRate: 15, defaultQty: 1, maxTotal: 100 },
+  { id: 'youngDriverFee', name: 'Young Driver Fee (21-24 years old)', zhName: '年轻驾驶员附加费（21-24岁）', dailyRate: 25, defaultQty: 1 }
 ];
 const insuranceOptions = [
   { id: 'standard', name: 'Standard Cover', zhName: '标准保险', dailyRate: 0, excess: 'NZ$4,000', bond: 'NZ$2,000' },
