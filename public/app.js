@@ -26,6 +26,7 @@ const i18n = {
     heroTitle: 'Explore New Zealand with Blue Rental',
     heroCopy: 'Find the best cars for your journey. Affordable, well-maintained vehicles for city errands, South Island road trips and business travel.',
     labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Pick-up time', 'Drop-off date', 'Drop-off time'],
+    fieldHints: ['', '', 'NZ local time, DD/MM/YYYY', 'NZ local time', 'NZ local time, DD/MM/YYYY', 'NZ local time'],
     locations: ['Hornby Office', 'CHC Airport', 'Christchurch City', 'ZQN Airport'],
     searchButton: 'Search Vehicles',
     trust: [
@@ -404,6 +405,7 @@ i18n.zh.process = {
   ]
 };
 i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间'];
+i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间'];
 
 vehicleText.en = {
   'budget-vitz': {
@@ -641,6 +643,8 @@ function applyLanguage() {
 
   document.querySelectorAll('.booking-panel label').forEach((label, index) => {
     setLabelText(label, t.labels[index]);
+    const hint = label.querySelector('.field-hint');
+    if (hint) hint.textContent = t.fieldHints?.[index] || '';
   });
   document.querySelectorAll('.booking-panel select[name$="Location"]').forEach((select) => {
     const selectedIndex = Math.max(0, select.selectedIndex);

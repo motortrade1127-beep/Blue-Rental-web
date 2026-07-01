@@ -191,6 +191,13 @@ label {
   font-weight: 700;
 }
 
+.field-hint {
+  margin-top: -4px;
+  color: #8a9aa3;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
 input,
 select {
   width: 100%;
