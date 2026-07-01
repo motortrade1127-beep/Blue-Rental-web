@@ -616,6 +616,7 @@ function calculateSelectedVehicle() {
     const qtyInput = row.querySelector('input[type="number"]');
     const extra = optionalExtras.find((item) => item.id === row.dataset.extra);
     if (!extra || !checkbox?.checked) return;
+    if (selectedInsurance.id === 'elite' && extra.id === 'roadside') return;
 
     const qty = Math.max(1, Number(qtyInput?.value || extra.defaultQty || 1));
     const total = Math.min(extra.dailyRate * qty * days, extra.maxTotal || Infinity);
@@ -663,6 +664,19 @@ function renderSelectedSummary() {
     `${formatSearchDate(currentSearch.pickupDate)} ${currentSearch.pickupTime || ''} - ${formatSearchDate(currentSearch.returnDate)} ${currentSearch.returnTime || ''}`,
     `${t.vehicle.total} ${money.format(pricedVehicle.total)} / ${t.vehicle.deposit} ${money.format(pricedVehicle.deposit)}`
   ].join('<br>');
+}
+
+function syncExtrasForInsurance() {
+  const selectedInsuranceId = insurancePanel?.querySelector('input[name="insuranceOption"]:checked')?.value || 'standard';
+  extrasPanel?.querySelectorAll('[data-extra]').forEach((row) => {
+    const isRoadside = row.dataset.extra === 'roadside';
+    const hidden = selectedInsuranceId === 'elite' && isRoadside;
+    row.hidden = hidden;
+    if (hidden) {
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      if (checkbox) checkbox.checked = false;
+    }
+  });
 }
 
 function renderExtrasPanel() {
@@ -721,13 +735,18 @@ function renderInsurancePanel() {
       `).join('')}
     </div>
   `;
-  insurancePanel.onchange = renderSelectedSummary;
+  insurancePanel.onchange = () => {
+    syncExtrasForInsurance();
+    updateExtrasTotals();
+  };
 }
 
 function updateExtrasTotals() {
   if (!extrasPanel || !selectedVehicle) return;
+  syncExtrasForInsurance();
   const days = Number(selectedVehicle.days || searchDays());
   extrasPanel.querySelectorAll('[data-extra]').forEach((row) => {
+    if (row.hidden) return;
     const checkbox = row.querySelector('input[type="checkbox"]');
     const qtyInput = row.querySelector('input[type="number"]');
     const totalNode = row.querySelector('[data-extra-total]');
