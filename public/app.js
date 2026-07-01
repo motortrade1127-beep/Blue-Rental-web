@@ -616,7 +616,7 @@ function calculateSelectedVehicle() {
     const qtyInput = row.querySelector('input[type="number"]');
     const extra = optionalExtras.find((item) => item.id === row.dataset.extra);
     if (!extra || !checkbox?.checked) return;
-    if (selectedInsurance.id === 'elite' && extra.id === 'roadside') return;
+    if (['smart', 'elite'].includes(selectedInsurance.id) && extra.id === 'roadside') return;
 
     const qty = Math.max(1, Number(qtyInput?.value || extra.defaultQty || 1));
     const total = Math.min(extra.dailyRate * qty * days, extra.maxTotal || Infinity);
@@ -670,7 +670,7 @@ function syncExtrasForInsurance() {
   const selectedInsuranceId = insurancePanel?.querySelector('input[name="insuranceOption"]:checked')?.value || 'standard';
   extrasPanel?.querySelectorAll('[data-extra]').forEach((row) => {
     const isRoadside = row.dataset.extra === 'roadside';
-    const hidden = selectedInsuranceId === 'elite' && isRoadside;
+    const hidden = ['smart', 'elite'].includes(selectedInsuranceId) && isRoadside;
     row.hidden = hidden;
     if (hidden) {
       const checkbox = row.querySelector('input[type="checkbox"]');
