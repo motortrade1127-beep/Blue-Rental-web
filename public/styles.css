@@ -802,6 +802,141 @@ dialog::backdrop {
   background: var(--soft);
 }
 
+.chat-assistant {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 30;
+  font-family: inherit;
+}
+
+.chat-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 18px 0 10px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--accent-dark);
+  box-shadow: 0 18px 45px rgba(5, 18, 24, 0.24);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.chat-toggle span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #132c35;
+  background: var(--orange);
+}
+
+.chat-panel {
+  position: absolute;
+  right: 0;
+  bottom: 66px;
+  display: none;
+  width: min(380px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(5, 18, 24, 0.24);
+}
+
+.chat-assistant.open .chat-panel {
+  display: grid;
+}
+
+.chat-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  color: #fff;
+  background: var(--accent-dark);
+}
+
+.chat-panel header strong,
+.chat-panel header small {
+  display: block;
+}
+
+.chat-panel header small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.chat-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  font: inherit;
+  cursor: pointer;
+}
+
+.chat-messages {
+  display: grid;
+  gap: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--soft);
+}
+
+.chat-message {
+  width: fit-content;
+  max-width: 88%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  line-height: 1.45;
+}
+
+.chat-message.assistant {
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.chat-message.user {
+  justify-self: end;
+  color: #fff;
+  background: var(--accent);
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 12px;
+  background: #fff;
+}
+
+.chat-form input {
+  min-height: 44px;
+}
+
+.chat-form button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  color: #132c35;
+  background: var(--orange);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
   .site-header {
     padding: 0 20px;
@@ -923,6 +1058,15 @@ dialog::backdrop {
 
   .review-track article {
     width: 270px;
+  }
+
+  .chat-assistant {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .chat-panel {
+    bottom: 62px;
   }
 }
 

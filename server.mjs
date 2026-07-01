@@ -587,6 +587,72 @@ app.get('/api/payment-records', requireAdmin, async (req, res) => {
   });
 });
 
+const assistantTopics = [
+  {
+    keys: ['airport', 'shuttle', 'chc', '机场', '接送', '穿梭'],
+    en: 'Christchurch Airport bookings include a free shuttle between the airport and our Hornby branch. After booking, Blue Rental can confirm the exact pick-up instructions.',
+    zh: '基督城机场订单可使用机场和 Hornby 门店之间的免费 shuttle 接送。完成预订后，Blue Rental 会确认具体接送说明。'
+  },
+  {
+    keys: ['location', 'address', 'hornby', 'queenstown', 'zqn', '地点', '地址', '皇后镇', '门店'],
+    en: 'Blue Rental is based at 249 Main South Rd, Hornby, Christchurch 8042. Queenstown Airport service is listed as coming soon.',
+    zh: 'Blue Rental 门店位于 249 Main South Rd, Hornby, Christchurch 8042。皇后镇机场服务目前为 coming soon。'
+  },
+  {
+    keys: ['hour', 'open', 'time', 'holiday', '营业', '时间', '假期'],
+    en: 'Normal opening hours are 9.30am to 5pm. Public holiday surcharge may apply, so please confirm special-date bookings with the team.',
+    zh: '正常营业时间为 9.30am-5pm。公共假期可能会有 surcharge，特殊日期建议和团队确认。'
+  },
+  {
+    keys: ['insurance', 'cover', 'excess', 'bond', 'tyre', 'windshield', '保险', '垫底', '押金', '轮胎', '玻璃'],
+    en: 'Blue Rental offers Standard, Smart and Elite cover options. Standard is NZ$0/day with higher excess and bond, Smart is NZ$20/day, and Elite is NZ$40/day with lower excess. Final eligibility is confirmed at booking or pick-up.',
+    zh: 'Blue Rental 提供 Standard、Smart、Elite 三档保险。Standard 为 NZ$0/天但垫底费和预授权较高，Smart 为 NZ$20/天，Elite 为 NZ$40/天且垫底费更低。最终适用情况以预订或取车确认 为准。'
+  },
+  {
+    keys: ['deposit', 'payment', 'pay', 'windcave', 'pxpay', '定金', '付款', '支付'],
+    en: 'Online bookings can pay a 10% deposit through Windcave PxPay. The remaining balance can be paid at pick-up unless Blue Rental confirms otherwise.',
+    zh: '线上预订可通过 Windcave PxPay 支付订单金额 10% 的定金。余款通常可在取车时支付，具体以 Blue Rental 确认为准。'
+  },
+  {
+    keys: ['vehicle', 'car', 'suv', '7 seater', 'aqua', 'vitz', '车型', '车辆', '七座', '租什么车'],
+    en: 'Available categories include Super Eco, Eco Model, Compact, Intermediate, Wagon, Middle Size Sedan, 7 Seater, SUV and Luxury SUV. For final availability and price, please search dates on the Vehicles page.',
+    zh: '车型类别包括 Super Eco、Eco Model、Compact、Intermediate、Wagon、Middle Size Sedan、7 Seater、SUV 和 Luxury SUV。最终库存和价格请在 Vehicles 页面输入日期查询。'
+  },
+  {
+    keys: ['discount', '25', 'off', 'deal', '折扣', '优惠'],
+    en: 'Online booking may enjoy up to 25% off. T&C apply, and the final discount depends on the booking details.',
+    zh: '线上预订最高可享 25% off，T&C apply。最终折扣以具体订单条件为准。'
+  },
+  {
+    keys: ['license', 'licence', 'driver', 'age', '驾照', '驾驶', '年龄'],
+    en: 'Please bring a valid driver licence and any required translation or international driving permit. Age, licence and bond rules may depend on vehicle type and booking details.',
+    zh: '取车时请携带有效驾照，以及需要的翻译件或国际驾照。年龄、驾照和押金要求可能因车型和订单情况不同。'
+  },
+  {
+    keys: ['contact', 'phone', 'email', 'call', '联系', '电话', '邮箱', '人工'],
+    en: 'You can contact Blue Rental at 03 281 8858 or info@bluerental.co.nz. For booking-specific questions, please include your booking reference if you have one.',
+    zh: '你可以通过 03 281 8858 或 info@bluerental.co.nz 联系 Blue Rental。如咨询已有订单，请附上 booking reference。'
+  }
+];
+
+function assistantReply(message = '', language = '') {
+  const text = String(message).toLowerCase();
+  const wantsChinese = language === 'zh' || /[\u3400-\u9fff]/.test(message);
+  const topic = assistantTopics.find((item) => item.keys.some((key) => text.includes(key.toLowerCase())));
+
+  if (topic) return wantsChinese ? topic.zh : topic.en;
+
+  return wantsChinese
+    ? '我可以回答 Blue Rental 的取还车、机场 shuttle、车型、保险、定金和营业时间等常见问题。如果是具体订单或实时库存，请联系 03 281 8858 或 info@bluerental.co.nz。'
+    : 'I can help with Blue Rental pick-up, airport shuttle, vehicles, insurance, deposit payment and opening-hours questions. For booking-specific details or live availability, please contact 03 281 8858 or info@bluerental.co.nz.';
+}
+
+app.post('/api/chat', (req, res) => {
+  const message = req.body?.message || '';
+  const language = req.body?.language || '';
+  res.json({ reply: assistantReply(message, language) });
+});
+
 app.listen(port, () => {
   console.log(`Rental site running at ${siteUrl}`);
 });
