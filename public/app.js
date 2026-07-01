@@ -517,7 +517,7 @@ function setDefaultDates() {
   form.elements.pickupDate.value = pickup.toISOString().slice(0, 10);
   form.elements.returnDate.value = dropoff.toISOString().slice(0, 10);
   if (form.elements.pickupTime && !form.elements.pickupTime.value) form.elements.pickupTime.value = '09:30';
-  if (form.elements.returnTime && !form.elements.returnTime.value) form.elements.returnTime.value = '17:00';
+  if (form.elements.returnTime && !form.elements.returnTime.value) form.elements.returnTime.value = '09:30';
 }
 
 function applySearchParams() {
