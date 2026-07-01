@@ -119,7 +119,7 @@ function bookingText(booking) {
     `Deposit paid: ${payment.deposit ? `NZD ${payment.deposit}` : 'Pending'}`,
     `Total: ${vehicle.total ? `NZD ${vehicle.total}` : 'Pending'}`,
     `Vehicle: ${vehicle.name || 'Vehicle pending'}`,
-    `Dates: ${search.pickupDate || ''} - ${search.returnDate || ''}`,
+    `Dates: ${search.pickupDate || ''} ${search.pickupTime || ''} - ${search.returnDate || ''} ${search.returnTime || ''}`,
     `Route: ${search.pickupLocation || ''} to ${search.returnLocation || ''}`,
     `Customer: ${customer.name || ''}`,
     `Email: ${customer.email || ''}`,
@@ -618,6 +618,11 @@ const assistantTopics = [
     zh: '线上预订可通过 Windcave PxPay 支付订单金额 10% 的定金。余款通常可在取车时支付，具体以 Blue Rental 确认为准。'
   },
   {
+    keys: ['booking', 'book', 'reserve', 'reservation', 'rent a car', 'hire a car', '预订', '訂車', '订车', '租车', '租車', '我要租车'],
+    en: 'You can start a booking on the Vehicles page by choosing pick-up location, drop-off location, date and time. After you choose a vehicle, enter your contact details and pay the 10% deposit to hold the car.',
+    zh: '你可以在 Vehicles 页面开始预订：先选择取车/还车地点、日期和时间，再选择车辆，填写姓名、邮箱和电话，最后支付 10% 定金锁定车辆。'
+  },
+  {
     keys: ['vehicle', 'car', 'suv', '7 seater', 'aqua', 'vitz', '车型', '车辆', '七座', '租什么车'],
     en: 'Available categories include Super Eco, Eco Model, Compact, Intermediate, Wagon, Middle Size Sedan, 7 Seater, SUV and Luxury SUV. For final availability and price, please search dates on the Vehicles page.',
     zh: '车型类别包括 Super Eco、Eco Model、Compact、Intermediate、Wagon、Middle Size Sedan、7 Seater、SUV 和 Luxury SUV。最终库存和价格请在 Vehicles 页面输入日期查询。'
@@ -681,31 +686,42 @@ async function aiAssistantReply(message = '', language = '') {
   const outputLanguage = wantsChinese ? 'Chinese' : 'English';
   const fallback = assistantReply(message, language);
 
-  const response = await openai.responses.create({
-    model: aiAssistantModel,
-    input: [
-      {
-        role: 'system',
-        content: [
-          `You are Blue Rental Assistant, a helpful website chat assistant for a New Zealand car rental company.`,
-          `Answer in ${outputLanguage}. Be friendly, concise, and practical.`,
-          `Use only the business information below. Do not invent live availability, final prices, refunds, policy exceptions, or booking status.`,
-          `If the question requires a booking-specific answer, live inventory, final eligibility, or anything not in the knowledge base, say that Blue Rental should confirm it and provide phone/email.`,
-          `Never ask for full credit card details or sensitive passwords in chat.`,
-          assistantKnowledge,
-          `If the user's question is unrelated to car rental or Blue Rental, politely redirect them to Blue Rental rental questions.`
-        ].join('\n')
-      },
-      {
-        role: 'user',
-        content: String(message).slice(0, 1000)
-      }
-    ],
-    max_output_tokens: 260
-  });
+  const response = await Promise.race([
+    openai.responses.create({
+      model: aiAssistantModel,
+      input: [
+        {
+          role: 'system',
+          content: [
+            `You are Blue Rental Assistant, a helpful website chat assistant for a New Zealand car rental company.`,
+            `Answer in ${outputLanguage}. Be friendly, concise, and practical.`,
+            `Use only the business information below. Do not invent live availability, final prices, refunds, policy exceptions, or booking status.`,
+            `If the question requires a booking-specific answer, live inventory, final eligibility, or anything not in the knowledge base, say that Blue Rental should confirm it and provide phone/email.`,
+            `Never ask for full credit card details or sensitive passwords in chat.`,
+            assistantKnowledge,
+            `If the user's question is unrelated to car rental or Blue Rental, politely redirect them to Blue Rental rental questions.`
+          ].join('\n')
+        },
+        {
+          role: 'user',
+          content: String(message).slice(0, 1000)
+        }
+      ],
+      max_output_tokens: 260
+    }),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('AI assistant timeout')), 9000))
+  ]);
 
   return response.output_text?.trim() || fallback;
 }
+
+app.get('/api/chat-status', (req, res) => {
+  res.json({
+    aiConfigured: Boolean(openai),
+    mode: openai ? 'ai' : 'faq',
+    model: openai ? aiAssistantModel : null
+  });
+});
 
 app.post('/api/chat', async (req, res) => {
   const message = req.body?.message || '';

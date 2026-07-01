@@ -56,8 +56,16 @@
             <input name="pickupDate" type="date" required>
           </label>
           <label>
+            Pick-up time
+            <select name="pickupTime" data-time-select data-default-time="09:30" required></select>
+          </label>
+          <label>
             Drop-off date
             <input name="returnDate" type="date" required>
+          </label>
+          <label>
+            Drop-off time
+            <select name="returnTime" data-time-select data-default-time="17:00" required></select>
           </label>
           <button class="button primary" type="submit">Search Vehicles</button>
         </form>

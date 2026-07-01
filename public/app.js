@@ -25,7 +25,7 @@ const i18n = {
     heroEyebrow: 'Christchurch & South Island Car Hire',
     heroTitle: 'Explore New Zealand with Blue Rental',
     heroCopy: 'Find the best cars for your journey. Affordable, well-maintained vehicles for city errands, South Island road trips and business travel.',
-    labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Drop-off date'],
+    labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Pick-up time', 'Drop-off date', 'Drop-off time'],
     locations: ['Hornby Office', 'CHC Airport', 'Christchurch City', 'ZQN Airport'],
     searchButton: 'Search Vehicles',
     trust: [
@@ -120,7 +120,7 @@ const i18n = {
     status: {
       selectDates: 'Select your dates to search available vehicles.',
       searching: 'Searching available Blue Rental vehicles...',
-      dateError: 'Drop-off date must be later than pick-up date.',
+      dateError: 'Drop-off date and time must be later than pick-up date and time.',
       rcm: 'Live vehicles returned from Rental Car Manager.',
       demo: 'Demo Blue Rental inventory is showing now. Add RCM API credentials to switch to live availability.'
     },
@@ -403,6 +403,7 @@ i18n.zh.process = {
     ['04', '到达门店取车开始旅程', '到达门店完成取车流程，开始您的新西兰旅程。']
   ]
 };
+i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间'];
 
 vehicleText.en = {
   'budget-vitz': {
@@ -488,6 +489,24 @@ function tr() {
   return i18n[currentLang];
 }
 
+function timeOptions() {
+  const options = [];
+  for (let minutes = 9 * 60 + 30; minutes <= 17 * 60; minutes += 30) {
+    const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const minute = String(minutes % 60).padStart(2, '0');
+    options.push(`${hour}:${minute}`);
+  }
+  return options;
+}
+
+function populateTimeSelects() {
+  document.querySelectorAll('[data-time-select]').forEach((select) => {
+    const selectedValue = select.value || select.dataset.defaultTime;
+    select.innerHTML = timeOptions().map((value) => `<option value="${value}">${value}</option>`).join('');
+    select.value = selectedValue && timeOptions().includes(selectedValue) ? selectedValue : select.dataset.defaultTime;
+  });
+}
+
 function setDefaultDates() {
   if (!form) return;
   const today = new Date();
@@ -497,12 +516,14 @@ function setDefaultDates() {
   dropoff.setDate(today.getDate() + 6);
   form.elements.pickupDate.value = pickup.toISOString().slice(0, 10);
   form.elements.returnDate.value = dropoff.toISOString().slice(0, 10);
+  if (form.elements.pickupTime && !form.elements.pickupTime.value) form.elements.pickupTime.value = '09:30';
+  if (form.elements.returnTime && !form.elements.returnTime.value) form.elements.returnTime.value = '17:00';
 }
 
 function applySearchParams() {
   if (!form) return;
   const params = new URLSearchParams(location.search);
-  ['pickupLocation', 'returnLocation', 'pickupDate', 'returnDate'].forEach((key) => {
+  ['pickupLocation', 'returnLocation', 'pickupDate', 'pickupTime', 'returnDate', 'returnTime'].forEach((key) => {
     const value = params.get(key);
     if (value && form.elements[key]) form.elements[key].value = value;
   });
@@ -574,7 +595,7 @@ function applyLanguage() {
   document.querySelectorAll('.booking-panel label').forEach((label, index) => {
     setLabelText(label, t.labels[index]);
   });
-  document.querySelectorAll('.booking-panel select').forEach((select) => {
+  document.querySelectorAll('.booking-panel select[name$="Location"]').forEach((select) => {
     const selectedIndex = Math.max(0, select.selectedIndex);
     select.innerHTML = t.locations.map((location) => `<option>${location}</option>`).join('');
     select.selectedIndex = Math.min(selectedIndex, t.locations.length - 1);
@@ -707,7 +728,9 @@ if (form) {
       return;
     }
 
-    if (new Date(currentSearch.returnDate) <= new Date(currentSearch.pickupDate)) {
+    const pickupDateTime = new Date(`${currentSearch.pickupDate}T${currentSearch.pickupTime || '00:00'}`);
+    const returnDateTime = new Date(`${currentSearch.returnDate}T${currentSearch.returnTime || '00:00'}`);
+    if (returnDateTime <= pickupDateTime) {
       setStatusKey('dateError', 'error');
       return;
     }
@@ -738,7 +761,7 @@ if (fleetGrid) fleetGrid.addEventListener('click', (event) => {
   selectedSummary.innerHTML = [
     `<strong>${vehicle.name}</strong>`,
     `${currentSearch.pickupLocation} ${t.vehicle.connector} ${currentSearch.returnLocation}`,
-    `${currentSearch.pickupDate} - ${currentSearch.returnDate}`,
+    `${currentSearch.pickupDate} ${currentSearch.pickupTime || ''} - ${currentSearch.returnDate} ${currentSearch.returnTime || ''}`,
     `${t.vehicle.total} ${money.format(vehicle.total)} / ${t.vehicle.deposit} ${money.format(vehicle.deposit)}`
   ].join('<br>');
   dialog.showModal();
@@ -789,6 +812,7 @@ document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
 
 if (closeButton && dialog) closeButton.addEventListener('click', () => dialog.close());
 
+populateTimeSelects();
 setDefaultDates();
 applySearchParams();
 applyLanguage();
