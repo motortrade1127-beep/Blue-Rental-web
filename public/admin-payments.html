@@ -94,9 +94,8 @@
                   <dt>Phone</dt><dd>${customer.phone || 'Not recorded'}</dd>
                   <dt>Vehicle</dt><dd>${vehicle.name || payment.vehicleName || 'Not recorded'}</dd>
                   <dt>Dates</dt><dd>${formatRentalDate(search.pickupDate)} ${search.pickupTime || ''} - ${formatRentalDate(search.returnDate)} ${search.returnTime || ''}</dd>
-                  <dt>Driver age</dt><dd>${search.driverAge || 'Not recorded'}</dd>
-                  <dt>Promo code</dt><dd>${search.promoCode || 'None'}</dd>
-                  <dt>Young driver fee</dt><dd>${money(vehicle.youngDriverFee)}</dd>
+                  <dt>Over 21 confirmed</dt><dd>${customer.over21Consent === 'yes' ? 'Yes' : 'No'}</dd>
+                  <dt>Promo code</dt><dd>${customer.promoCode || 'None'}</dd>
                   <dt>Extras</dt><dd>${extras}</dd>
                   <dt>Deposit</dt><dd>${money(payment.deposit)}</dd>
                   <dt>Paid at</dt><dd>${formatDate(payment.paidAt)}</dd>

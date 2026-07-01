@@ -853,6 +853,33 @@ dialog::backdrop {
   color: var(--ink);
 }
 
+.age-confirm {
+  display: flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+}
+
+.age-confirm input {
+  width: 20px;
+  min-height: 20px;
+}
+
+.form-notice {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 6px;
+  color: #8f2b16;
+  background: #fff0ea;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .success-page {
   min-height: 100vh;
   display: grid;

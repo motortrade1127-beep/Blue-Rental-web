@@ -128,9 +128,8 @@ function bookingText(booking) {
     `Vehicle: ${vehicle.name || 'Vehicle pending'}`,
     `Dates: ${formatDate(search.pickupDate)} ${search.pickupTime || ''} - ${formatDate(search.returnDate)} ${search.returnTime || ''}`,
     `Route: ${search.pickupLocation || ''} to ${search.returnLocation || ''}`,
-    `Driver age: ${search.driverAge || ''}`,
-    `Promo code: ${search.promoCode || 'None'}`,
-    `Mandatory fees: ${vehicle.youngDriverFee ? `Young Driver Fee NZD ${vehicle.youngDriverFee}` : 'None'}`,
+    `Over 21 confirmed: ${customer.over21Consent === 'yes' ? 'Yes' : 'No'}`,
+    `Promo code: ${customer.promoCode || 'None'}`,
     `Optional extras: ${extras}`,
     `Customer: ${customer.name || ''}`,
     `Email: ${customer.email || ''}`,
@@ -343,18 +342,13 @@ async function callRcm(path, body) {
 
 function quoteVehicle(vehicle, search) {
   const days = rentalDays(search);
-  const driverAge = Number(search.driverAge || 25);
-  if (driverAge < 21) {
-    throw new Error('Drivers under 21 cannot rent a vehicle from Blue Rental.');
-  }
   const subtotal = vehicle.dailyRate * days;
-  const youngDriverFee = driverAge >= 21 && driverAge <= 25 ? 20 * days : 0;
   const fees = Math.round(subtotal * 0.08);
-  const total = subtotal + fees + youngDriverFee;
+  const total = subtotal + fees;
   const depositPercent = Number(process.env.DEPOSIT_PERCENT || 10);
   const deposit = Math.round(total * depositPercent / 100);
 
-  return { ...vehicle, days, subtotal, fees, youngDriverFee, total, deposit };
+  return { ...vehicle, days, subtotal, fees, total, deposit };
 }
 
 function xmlEscape(value = '') {

@@ -33,8 +33,8 @@ const i18n = {
     heroEyebrow: 'Christchurch & South Island Car Hire',
     heroTitle: 'Explore New Zealand with Blue Rental',
     heroCopy: 'Find the best cars for your journey. Affordable, well-maintained vehicles for city errands, South Island road trips and business travel.',
-    labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Pick-up time', 'Drop-off date', 'Drop-off time', 'Driver age', 'Promo code'],
-    fieldHints: ['', '', 'NZ local time, DD/MM/YYYY', 'NZ local time', 'NZ local time, DD/MM/YYYY', 'NZ local time', '21+ only. 21-25 adds NZ$20/day young driver fee.', 'Optional'],
+    labels: ['Pick-up location', 'Drop-off location', 'Pick-up date', 'Pick-up time', 'Drop-off date', 'Drop-off time'],
+    fieldHints: ['', '', 'NZ local time, DD/MM/YYYY', 'NZ local time', 'NZ local time, DD/MM/YYYY', 'NZ local time'],
     locations: ['Hornby Office', 'CHC Airport', 'Christchurch City', 'ZQN Airport'],
     searchButton: 'Search Vehicles',
     trust: [
@@ -117,8 +117,10 @@ const i18n = {
     dialog: {
       eyebrow: 'Secure Booking',
       title: 'Confirm booking and pay 10% deposit',
-      labels: ['Name', 'Email', 'Phone'],
-      placeholders: ['Full name', 'name@example.com', '+64'],
+      labels: ['Name', 'Email', 'Phone', 'Promo code'],
+      placeholders: ['Full name', 'name@example.com', '+64', 'Optional'],
+      ageConsent: "I'm over 21 years old",
+      ageNotice: 'Sorry, due to our insurance policy, Blue Rental is currently unable to rent vehicles to customers under 21.',
       finePrint: 'Payments are handled by Windcave PxPay. In demo mode, this redirects to a simulated success page.'
     },
     buttons: {
@@ -130,7 +132,6 @@ const i18n = {
       selectDates: 'Select your dates to search available vehicles.',
       searching: 'Searching available Blue Rental vehicles...',
       dateError: 'Drop-off date and time must be later than pick-up date and time.',
-      ageError: 'Drivers under 21 cannot rent a vehicle from Blue Rental.',
       rcm: 'Live vehicles returned from Rental Car Manager.',
       demo: 'Demo Blue Rental inventory is showing now. Add RCM API credentials to switch to live availability.'
     },
@@ -146,8 +147,6 @@ const i18n = {
       extras: 'Optional extras',
       qty: 'Qty',
       daily: 'Daily',
-      mandatoryFee: 'Mandatory fee',
-      youngDriverFee: 'Young Driver Fee',
       connector: 'to',
       perDay: 'day'
     }
@@ -418,15 +417,16 @@ i18n.zh.process = {
     ['04', '到达门店取车开始旅程', '到达门店完成取车流程，开始您的新西兰旅程。']
   ]
 };
-i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间', '驾驶员年龄', '优惠码'];
-i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '仅限 21 岁以上。21-25 岁自动加 NZ$20/天 young driver fee。', '选填'];
-i18n.zh.status.ageError = '21 岁以下暂不可租车。';
+i18n.zh.labels = ['取车地点', '还车地点', '取车日期', '取车时间', '还车日期', '还车时间'];
+i18n.zh.fieldHints = ['', '', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间', '新西兰本地时间，DD/MM/YYYY', '新西兰本地时间'];
+i18n.zh.dialog.labels = ['姓名', '邮箱', '电话', '优惠码'];
+i18n.zh.dialog.placeholders = ['姓名', 'name@example.com', '+64', '选填'];
+i18n.zh.dialog.ageConsent = '我已年满 21 岁';
+i18n.zh.dialog.ageNotice = '抱歉，由于保险政策要求，我们暂时不对 21 岁以下的客人开放租车服务。';
 Object.assign(i18n.zh.vehicle, {
   extras: '可选服务',
   qty: '数量',
-  daily: '按日收费',
-  mandatoryFee: '必选费用',
-  youngDriverFee: 'Young Driver Fee'
+  daily: '按日收费'
 });
 
 vehicleText.en = {
@@ -572,9 +572,7 @@ function normalizeSearchDates(search) {
   return {
     ...search,
     pickupDate: toIsoDate(search.pickupDate),
-    returnDate: toIsoDate(search.returnDate),
-    driverAge: String(search.driverAge || '').trim(),
-    promoCode: String(search.promoCode || '').trim()
+    returnDate: toIsoDate(search.returnDate)
   };
 }
 
@@ -595,11 +593,6 @@ function showSearchError(key) {
 function calculateSelectedVehicle() {
   if (!selectedVehicle) return null;
   const days = Number(selectedVehicle.days || searchDays());
-  const driverAge = Number(currentSearch.driverAge || 25);
-  const requiredYoungDriverFee = driverAge >= 21 && driverAge <= 25 ? 20 * days : 0;
-  const hasYoungDriverFee = selectedVehicle.youngDriverFee !== undefined && selectedVehicle.youngDriverFee !== null;
-  const youngDriverFee = hasYoungDriverFee ? Number(selectedVehicle.youngDriverFee || 0) : requiredYoungDriverFee;
-  const mandatoryAdjustment = hasYoungDriverFee ? 0 : youngDriverFee;
   const selectedExtras = [];
   let extrasTotal = 0;
 
@@ -623,11 +616,10 @@ function calculateSelectedVehicle() {
   });
 
   const baseTotal = Number(selectedVehicle.total || 0);
-  const total = baseTotal + mandatoryAdjustment + extrasTotal;
+  const total = baseTotal + extrasTotal;
   const deposit = Math.round(total * depositPercent / 100);
   return {
     ...selectedVehicle,
-    youngDriverFee,
     total,
     deposit,
     optionalExtras: selectedExtras,
@@ -640,15 +632,12 @@ function renderSelectedSummary() {
   pricedVehicle = calculateSelectedVehicle();
   const vehicle = localizeVehicle(pricedVehicle);
   const t = tr();
-  const youngDriverLine = pricedVehicle.youngDriverFee
-    ? `<br>${t.vehicle.mandatoryFee}: ${t.vehicle.youngDriverFee} ${money.format(pricedVehicle.youngDriverFee)}`
-    : '';
 
   selectedSummary.innerHTML = [
     `<strong>${vehicle.name}</strong>`,
     `${currentSearch.pickupLocation} ${t.vehicle.connector} ${currentSearch.returnLocation}`,
     `${formatSearchDate(currentSearch.pickupDate)} ${currentSearch.pickupTime || ''} - ${formatSearchDate(currentSearch.returnDate)} ${currentSearch.returnTime || ''}`,
-    `${t.vehicle.total} ${money.format(pricedVehicle.total)} / ${t.vehicle.deposit} ${money.format(pricedVehicle.deposit)}${youngDriverLine}`
+    `${t.vehicle.total} ${money.format(pricedVehicle.total)} / ${t.vehicle.deposit} ${money.format(pricedVehicle.deposit)}`
   ].join('<br>');
 }
 
@@ -717,7 +706,7 @@ function setDefaultDates() {
 function applySearchParams() {
   if (!form) return;
   const params = new URLSearchParams(location.search);
-  ['pickupLocation', 'returnLocation', 'pickupDate', 'pickupTime', 'returnDate', 'returnTime', 'driverAge', 'promoCode'].forEach((key) => {
+  ['pickupLocation', 'returnLocation', 'pickupDate', 'pickupTime', 'returnDate', 'returnTime'].forEach((key) => {
     const value = params.get(key);
     if (value && form.elements[key]) {
       form.elements[key].value = key.endsWith('Date') ? toDateDisplay(value) : value;
@@ -853,10 +842,12 @@ function applyLanguage() {
 
   setText('#customerDialog .eyebrow', t.dialog.eyebrow);
   setText('#customerDialog h2', t.dialog.title);
-  document.querySelectorAll('#customerDialog label').forEach((label, index) => {
+  document.querySelectorAll('#customerDialog label:not(.age-confirm)').forEach((label, index) => {
     setLabelText(label, t.dialog.labels[index]);
     label.querySelector('input').placeholder = t.dialog.placeholders[index];
   });
+  setText('[data-age-consent-text]', t.dialog.ageConsent);
+  setText('#ageNotice', t.dialog.ageNotice);
   setText('#customerDialog button[type="submit"]', t.buttons.bookDeposit);
   setText('#customerDialog .fine-print', t.dialog.finePrint);
 
@@ -925,11 +916,6 @@ if (form) {
       return;
     }
 
-    if (Number(currentSearch.driverAge) < 21) {
-      showSearchError('ageError');
-      return;
-    }
-
     if (!fleetGrid || !statusBox) {
       const params = new URLSearchParams(currentSearch);
       window.location.href = `./vehicles.html?${params.toString()}#fleet`;
@@ -966,6 +952,8 @@ if (fleetGrid) fleetGrid.addEventListener('click', (event) => {
   pricedVehicle = selectedVehicle;
   renderExtrasPanel();
   renderSelectedSummary();
+  const ageNotice = document.getElementById('ageNotice');
+  if (ageNotice) ageNotice.hidden = true;
   dialog.showModal();
 });
 
@@ -974,6 +962,13 @@ if (customerForm) customerForm.addEventListener('submit', async (event) => {
   if (!selectedVehicle) return;
 
   const customer = formDataToObject(customerForm);
+  const ageNotice = document.getElementById('ageNotice');
+  if (customer.over21Consent !== 'yes') {
+    if (ageNotice) ageNotice.hidden = false;
+    return;
+  }
+  if (ageNotice) ageNotice.hidden = true;
+
   const submitButton = customerForm.querySelector('button[type="submit"]');
   submitButton.disabled = true;
   submitButton.textContent = tr().buttons.creating;
